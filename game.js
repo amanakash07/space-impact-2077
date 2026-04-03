@@ -409,8 +409,9 @@ class EBullet {
     }
     tick() { this.x += this.vx; this.y += this.vy; }
     draw() {
-        ctx.fillStyle = DARK; ctx.fillRect(this.x, this.y, this.w, this.h);
-        ctx.fillStyle = MID;  ctx.fillRect(this.x+1, this.y+this.h-5, this.w-2, 5);
+        // bright orange-red — clearly visible against any background
+        ctx.fillStyle = '#ff5500'; ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.fillStyle = '#ffaa00'; ctx.fillRect(this.x+1, this.y, this.w-2, 4);
     }
     alive() { return this.y < H+20 && this.x > -20 && this.x < W+20; }
 }
@@ -463,8 +464,10 @@ class Player {
         this.shield      = false;
         this.shieldTimer = 0;
         this.plusAnim    = 0;
-        this.bulletPower = false;  // spread big bullets
+        this.bulletPower = false;
         this.bulletTimer = 0;
+        this.ammo    = 60;   // starts full
+        this.maxAmmo = 60;
     }
     tick(inp) {
         let dx = 0;
@@ -473,14 +476,16 @@ class Player {
         this.x = Math.max(0, Math.min(W - this.w, this.x + dx * this.spd));
 
         this.sCool--;
-        if (inp.fire && this.sCool <= 0) {
+        const canFire = this.bulletPower || this.ammo > 0; // endless during power
+        if (inp.fire && this.sCool <= 0 && canFire) {
             if (this.bulletPower) {
-                // 3-way spread, bigger bullets
                 this.bullets.push(new PBullet(this.x + this.w/2, this.y, true));
                 this.bullets.push(new PBullet(this.x + this.w/2 - 14, this.y + 8, true));
                 this.bullets.push(new PBullet(this.x + this.w/2 + 14, this.y + 8, true));
+                // no ammo drain during power mode
             } else {
                 this.bullets.push(new PBullet(this.x + this.w/2, this.y, false));
+                this.ammo = Math.max(0, this.ammo - 1); // drain ammo
             }
             SND.shoot();
             this.sCool = 10;
@@ -489,8 +494,14 @@ class Player {
         if (this.inv > 0) this.inv--;
         if (this.shieldTimer > 0) this.shieldTimer--;
         else this.shield = false;
-        if (this.bulletTimer > 0) this.bulletTimer--;
-        else this.bulletPower = false;
+        if (this.bulletTimer > 0) {
+            this.bulletTimer--;
+        } else if (this.bulletPower) {
+            // power just expired — refill ammo to full
+            this.bulletPower = false;
+            this.ammo = this.maxAmmo;
+            floatText(this.cx(), this.y - 20, 'AMMO FULL', BRIGHT);
+        }
         if (this.plusAnim > 0) this.plusAnim--;
         this.thrA = (this.thrA + 1) % 8;
     }
@@ -524,7 +535,8 @@ class Player {
         floatText(this.cx(), this.y - 20, 'SHIELD!', SHIELD_COL);
     }
     addBulletPack() {
-        this.bulletPower = true; this.bulletTimer = 400; // ~6 sec
+        this.bulletPower = true; this.bulletTimer = 400;
+        this.ammo = this.maxAmmo; // also refills ammo
         SND.pickup();
         floatText(this.cx(), this.y - 20, 'POWER UP!', BRIGHT);
     }
@@ -937,35 +949,41 @@ function drawHUD(score, wave, player) {
     hWave.textContent  = 'WAVE: '  + wave;
     if (!player) return;
 
-    // HP bar bottom-center
-    const bw = 120, bh = 12;
-    const bx = W/2 - bw/2, by = H - bh - 6;
-    ctx.fillStyle = DARK; ctx.fillRect(bx, by, bw, bh);
-    ctx.fillStyle = player.hp > 2 ? BRIGHT : '#cc3300';
-    ctx.fillRect(bx, by, Math.round(bw * player.hp / player.maxHp), bh);
-    ctx.strokeStyle = DARK; ctx.lineWidth = 2;
-    ctx.strokeRect(bx, by, bw, bh);
-    ctx.fillStyle = DARK; ctx.font = 'bold 9px Courier New';
-    ctx.textAlign = 'center'; ctx.fillText('HP', W/2, by + bh - 2); ctx.textAlign = 'left';
+    // ── All bars at the TOP, centered ──────────────────────────────
+    const bw = 140, bh = 11, bx = W/2 - bw/2;
+    const gap = 16; // vertical gap between bars
+    let barY = 34;  // start just below score row
 
-    // shield timer bar
-    if (player.shield) {
-        const sw = Math.round(bw * player.shieldTimer / 300);
-        ctx.fillStyle = DARK; ctx.fillRect(bx, by - 18, bw, 10);
-        ctx.fillStyle = SHIELD_COL; ctx.fillRect(bx, by - 18, sw, 10);
-        ctx.strokeStyle = DARK; ctx.strokeRect(bx, by - 18, bw, 10);
-        ctx.fillStyle = DARK; ctx.font = 'bold 7px Courier New';
-        ctx.textAlign = 'center'; ctx.fillText('SHIELD', W/2, by - 10); ctx.textAlign = 'left';
+    function drawBar(label, frac, col, warn) {
+        ctx.fillStyle = '#0a1a05';
+        ctx.fillRect(bx, barY, bw, bh);
+        ctx.fillStyle = warn ? '#cc3300' : col;
+        ctx.fillRect(bx, barY, Math.round(bw * Math.max(0, frac)), bh);
+        ctx.strokeStyle = DARK; ctx.lineWidth = 1.5;
+        ctx.strokeRect(bx, barY, bw, bh);
+        ctx.fillStyle = DARK; ctx.font = 'bold 8px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, W/2, barY + bh - 2);
+        ctx.textAlign = 'left';
+        barY += gap;
     }
-    // bullet power timer bar
+
+    // HP bar — always shown
+    drawBar('HP', player.hp / player.maxHp, BRIGHT, player.hp <= 2);
+
+    // AMMO bar — always shown; flashes red when low
+    const ammoFrac = player.bulletPower ? 1 : player.ammo / player.maxAmmo;
+    const ammoLow  = !player.bulletPower && player.ammo <= 10;
+    drawBar(player.bulletPower ? 'ENDLESS' : 'AMMO', ammoFrac, player.bulletPower ? '#d4f06b' : BRIGHT, ammoLow);
+
+    // SHIELD timer bar — only when active
+    if (player.shield) {
+        drawBar('SHIELD', player.shieldTimer / 300, SHIELD_COL, false);
+    }
+
+    // POWER timer bar — only when active
     if (player.bulletPower) {
-        const barY = player.shield ? by - 34 : by - 18;
-        const pw = Math.round(bw * player.bulletTimer / 400);
-        ctx.fillStyle = DARK; ctx.fillRect(bx, barY, bw, 10);
-        ctx.fillStyle = BRIGHT; ctx.fillRect(bx, barY, pw, 10);
-        ctx.strokeStyle = DARK; ctx.strokeRect(bx, barY, bw, 10);
-        ctx.fillStyle = DARK; ctx.font = 'bold 7px Courier New';
-        ctx.textAlign = 'center'; ctx.fillText('POWER', W/2, barY + 8); ctx.textAlign = 'left';
+        drawBar('POWER', player.bulletTimer / 400, '#d4f06b', false);
     }
 }
 
