@@ -950,20 +950,25 @@ function drawHUD(score, wave, player) {
     if (!player) return;
 
     // ── All bars at the TOP, centered ──────────────────────────────
-    const bw = 140, bh = 11, bx = W/2 - bw/2;
-    const gap = 16; // vertical gap between bars
-    let barY = 34;  // start just below score row
+    const bw = Math.min(220, W * 0.38), bh = 14, bx = W/2 - bw/2;
+    const gap = 26;
+    let barY = 36;
 
     function drawBar(label, frac, col, warn) {
+        // label above bar
+        ctx.fillStyle = warn ? '#ff6622' : BRIGHT;
+        ctx.font = 'bold 11px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, W/2, barY - 2);
+        // track
         ctx.fillStyle = '#0a1a05';
         ctx.fillRect(bx, barY, bw, bh);
+        // fill
         ctx.fillStyle = warn ? '#cc3300' : col;
         ctx.fillRect(bx, barY, Math.round(bw * Math.max(0, frac)), bh);
-        ctx.strokeStyle = DARK; ctx.lineWidth = 1.5;
+        // border
+        ctx.strokeStyle = BRIGHT; ctx.lineWidth = 1;
         ctx.strokeRect(bx, barY, bw, bh);
-        ctx.fillStyle = DARK; ctx.font = 'bold 8px Courier New';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, W/2, barY + bh - 2);
         ctx.textAlign = 'left';
         barY += gap;
     }

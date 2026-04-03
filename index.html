@@ -354,6 +354,7 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
         <p id="oScore">SCORE: 0</p>
         <p id="oBest">BEST: 0</p>
         <button id="btnRestart">&#9654; PLAY AGAIN</button>
+        <button id="btnHome" style="margin-top:10px;padding:8px 30px;font-size:clamp(13px,2.5vw,18px);font-family:'Courier New',monospace;font-weight:bold;letter-spacing:2px;background:transparent;color:#6ab04c;border:1px solid #4d7c0f;cursor:pointer;">&#8962; HOME</button>
     </div>
 
 </div>
@@ -489,6 +490,12 @@ window.submitScore = async function(score, rawHandle) {
     }
     xInput.addEventListener('input', applyTag);
     applyTag();
+
+    document.getElementById('btnHome').addEventListener('click', () => {
+        document.getElementById('overPanel').style.display  = 'none';
+        document.getElementById('startPanel').style.display = '';
+        loadAndRender();
+    });
 
     const observer = new MutationObserver(() => {
         if (!document.getElementById('overlay').classList.contains('hidden')) loadAndRender();
