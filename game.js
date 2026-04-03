@@ -517,8 +517,8 @@ class Player {
         }
         this.hp--; this.inv = 55;
         boom(this.cx(), this.cy(), false);
-        if (this.hp <= 0) SND.hit();  // big crash on death
-        else SND.playerHit();         // small thud + vibrate on hit
+        if (this.hp <= 0) SND.hit();                        // crash sound on death
+        else if (navigator.vibrate) navigator.vibrate(80);  // vibrate only on hit, no sound
         return this.hp <= 0;
     }
     addHeart() {
