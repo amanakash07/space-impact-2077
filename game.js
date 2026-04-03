@@ -1062,6 +1062,10 @@ document.getElementById('btnRestart').addEventListener('click', startGame);
 
 function startGame() {
     if (running) return;
+    // Pre-warm the shot sound pool so the first bullet plays instantly
+    const warmUp = new Audio(SND._shot.src);
+    warmUp.volume = 0;
+    warmUp.play().catch(() => {});
     overlay.classList.add('hidden');
     bossWarn.style.display = 'none';
     initGame();
