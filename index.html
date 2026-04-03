@@ -6,6 +6,7 @@
 <title>Space Impact 2077</title>
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
+
 body {
     background:#000;
     overflow:hidden;
@@ -13,14 +14,18 @@ body {
     touch-action:none;
     user-select:none;
     -webkit-user-select:none;
+    font-family:'Courier New', monospace;
 }
+
 canvas {
     display:block;
     image-rendering:pixelated;
     image-rendering:crisp-edges;
 }
 
-/* ── HUD ── */
+/* ═══════════════════════════════════════════
+   IN-GAME HUD
+═══════════════════════════════════════════ */
 #hud {
     position:fixed; top:0; left:0; right:0;
     display:flex; justify-content:space-between; align-items:center;
@@ -34,30 +39,247 @@ canvas {
     z-index:10;
 }
 
-/* ── PANELS ── */
+/* ═══════════════════════════════════════════
+   OVERLAY WRAPPER  (lobby + game-over)
+═══════════════════════════════════════════ */
 #overlay {
     position:fixed; inset:0;
-    display:flex; align-items:center; justify-content:center;
     z-index:20;
-    background:rgba(0,0,0,0.5);
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 #overlay.hidden { display:none; }
 
-.panel {
-    background:rgba(5,18,2,0.97);
-    border:4px solid #adff2f;
-    padding:clamp(14px,4vw,38px) clamp(20px,7vw,58px);
+/* ═══════════════════════════════════════════
+   FULL-SCREEN LOBBY
+═══════════════════════════════════════════ */
+#startPanel {
+    position:absolute; inset:0;
+    background: linear-gradient(180deg,
+        rgba(0,0,0,0.92) 0%,
+        rgba(5,18,2,0.96) 50%,
+        rgba(0,0,0,0.92) 100%
+    );
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:space-between;
+    padding: clamp(18px,4vh,40px) clamp(16px,4vw,60px) clamp(12px,2.5vh,28px);
+    overflow-y:auto;
+}
+
+/* ── HEADER ─────────────────────────────── */
+.lobby-header {
     text-align:center;
+    width:100%;
+}
+.lobby-title {
+    font-size:clamp(26px,6vw,64px);
+    font-weight:bold;
+    letter-spacing:clamp(4px,1.5vw,12px);
+    color:#adff2f;
+    text-shadow: 0 0 20px rgba(173,255,47,0.5), 0 0 40px rgba(173,255,47,0.2);
+    line-height:1.1;
+}
+.lobby-sub {
+    font-size:clamp(10px,2vw,16px);
+    color:#6ab04c;
+    letter-spacing:2px;
+    margin-top:6px;
+}
+
+/* ── MAIN CONTENT (leaderboard + identity) */
+.lobby-main {
+    display:flex;
+    gap:clamp(16px,4vw,60px);
+    width:100%;
+    max-width:900px;
+    flex:1;
+    align-items:flex-start;
+    justify-content:center;
+    margin: clamp(12px,2.5vh,28px) 0;
+}
+
+/* ── LEADERBOARD CARD ─────────────────── */
+.lb-card {
+    flex:1;
+    min-width:0;
+    border:1px solid #2d6a1e;
+    padding:clamp(12px,2.5vw,24px);
+    background:rgba(5,18,2,0.6);
+}
+.lb-card h2 {
+    font-size:clamp(11px,1.8vw,15px);
+    color:#4d7c0f;
+    letter-spacing:4px;
+    margin-bottom:clamp(10px,2vh,18px);
+    text-align:center;
+    border-bottom:1px solid #2d6a1e;
+    padding-bottom:8px;
+}
+#leaderList {
+    list-style:none;
+    width:100%;
+}
+#leaderList li {
+    display:grid;
+    grid-template-columns: 28px 1fr auto;
+    align-items:center;
+    gap:8px;
+    padding:clamp(5px,1.2vh,10px) 0;
+    border-bottom:1px solid #1a3d0a;
+    font-size:clamp(10px,1.8vw,15px);
+}
+#leaderList li:last-child { border-bottom:none; }
+.lrank { color:#4d7c0f; font-weight:bold; }
+.lhandle a { color:#adff2f; text-decoration:none; }
+.lhandle a:hover { text-decoration:underline; }
+.lscore { color:#adff2f; font-weight:bold; letter-spacing:1px; text-align:right; }
+#leaderList li.lb-you { background:rgba(173,255,47,0.05); }
+#leaderList li.lb-you .lhandle a,
+#leaderList li.lb-you .lscore { color:#fff; }
+.lb-empty { color:#2d6a1e; font-size:clamp(9px,1.6vw,12px); text-align:center; padding:16px 0; }
+
+/* ── IDENTITY + CONTROLS CARD ─────────── */
+.id-card {
+    flex:1;
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    gap:clamp(12px,2.5vh,22px);
+}
+
+.id-section {
+    border:1px solid #2d6a1e;
+    padding:clamp(12px,2.5vw,22px);
+    background:rgba(5,18,2,0.6);
+}
+.id-section h2 {
+    font-size:clamp(11px,1.8vw,15px);
+    color:#4d7c0f;
+    letter-spacing:4px;
+    margin-bottom:clamp(10px,1.8vh,16px);
+    border-bottom:1px solid #2d6a1e;
+    padding-bottom:8px;
+}
+
+/* x handle input */
+.x-label {
+    font-size:clamp(9px,1.5vw,12px);
+    color:#4d7c0f;
+    letter-spacing:2px;
+    margin-bottom:8px;
+}
+#xInput {
+    width:100%;
+    background:#0a200a;
+    border:2px solid #2d6a1e;
+    color:#adff2f;
     font-family:'Courier New',monospace;
+    font-size:clamp(12px,2vw,16px);
+    padding:clamp(6px,1.2vh,10px) 12px;
+    outline:none;
+    letter-spacing:1px;
+    transition:border-color 0.2s;
+}
+#xInput:focus { border-color:#adff2f; }
+#xInput::placeholder { color:#2d6a1e; }
+.x-hint {
+    font-size:clamp(8px,1.3vw,10px);
+    color:#2d6a1e;
+    margin-top:6px;
+    letter-spacing:1px;
+}
+
+/* controls grid */
+.ctrl-grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr;
+    gap:8px 16px;
+}
+.ctrl-item {
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.ctrl-key {
+    font-size:clamp(11px,1.8vw,15px);
+    color:#adff2f;
+    font-weight:bold;
+    letter-spacing:1px;
+}
+.ctrl-desc {
+    font-size:clamp(8px,1.3vw,11px);
+    color:#4d7c0f;
+    letter-spacing:1px;
+}
+
+/* ── FOOTER ─────────────────────────────── */
+.lobby-footer {
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:clamp(8px,1.5vh,14px);
+}
+
+#btnStart {
+    padding:clamp(10px,2vh,16px) clamp(40px,8vw,80px);
+    font-size:clamp(14px,2.5vw,22px);
+    font-family:'Courier New',monospace;
+    font-weight:bold;
+    letter-spacing:4px;
+    background:#2d6a1e;
+    color:#adff2f;
+    border:2px solid #adff2f;
+    cursor:pointer;
+    transition:background 0.15s, box-shadow 0.15s;
+    box-shadow:0 0 12px rgba(173,255,47,0.15);
+}
+#btnStart:hover { background:#4d7c0f; box-shadow:0 0 20px rgba(173,255,47,0.3); }
+#btnStart:active { background:#6ab04c; }
+
+.footer-made {
+    font-size:clamp(9px,1.5vw,12px);
+    color:#2d6a1e;
+    letter-spacing:2px;
+}
+.footer-made a {
+    color:#4d7c0f;
+    text-decoration:none;
+}
+.footer-made a:hover { color:#adff2f; }
+
+/* ═══════════════════════════════════════════
+   MOBILE: stack leaderboard + id vertically
+═══════════════════════════════════════════ */
+@media (max-width:580px) {
+    .lobby-main { flex-direction:column; }
+    .ctrl-grid  { grid-template-columns:1fr; }
+}
+
+/* ═══════════════════════════════════════════
+   GAME-OVER PANEL  (small centered card)
+═══════════════════════════════════════════ */
+#overPanel {
+    background:rgba(5,18,2,0.97);
+    border:3px solid #adff2f;
+    padding:clamp(22px,5vw,48px) clamp(28px,8vw,72px);
+    text-align:center;
     color:#adff2f;
     max-width:92vw;
 }
-.panel h1 { font-size:clamp(20px,5vw,40px); letter-spacing:4px; margin-bottom:6px; }
-.panel p  { font-size:clamp(11px,2.5vw,16px); color:#6ab04c; margin:4px 0; }
-.panel small { font-size:clamp(9px,1.8vw,13px); color:#4d7c0f; display:block; margin-top:8px; }
-.panel button {
-    margin-top:16px;
-    padding:10px 38px;
+#overPanel h1 {
+    font-size:clamp(22px,5vw,42px);
+    letter-spacing:4px;
+    margin-bottom:14px;
+}
+#overPanel p  { font-size:clamp(12px,2.5vw,17px); color:#6ab04c; margin:6px 0; }
+#oGlobal { font-size:clamp(9px,1.8vw,13px) !important; color:#4d7c0f !important; margin-top:8px !important; }
+#overPanel button {
+    margin-top:22px;
+    padding:10px 42px;
     font-size:clamp(14px,3vw,20px);
     font-family:'Courier New',monospace;
     font-weight:bold;
@@ -66,74 +288,14 @@ canvas {
     color:#adff2f;
     border:2px solid #adff2f;
     cursor:pointer;
-    display:block; margin-left:auto; margin-right:auto;
 }
-.panel button:active { background:#6ab04c; }
+#overPanel button:active { background:#6ab04c; }
 
-/* ── LEADERBOARD BLOCK ── */
-#leaderBlock {
-    margin: 12px 0 4px;
-    border-top: 1px solid #2d6a1e;
-    padding-top: 10px;
-}
-#leaderBlock .lb-title {
-    font-size:clamp(10px,2vw,13px);
-    color:#4d7c0f;
-    letter-spacing:3px;
-    margin-bottom:6px;
-}
-#leaderList {
-    list-style:none;
-    padding:0;
-    margin:0;
-}
-#leaderList li {
-    font-size:clamp(10px,2.2vw,14px);
-    color:#6ab04c;
-    letter-spacing:1px;
-    margin:3px 0;
-    display:flex;
-    justify-content:space-between;
-    gap:16px;
-}
-#leaderList li .lrank { color:#4d7c0f; min-width:22px; }
-#leaderList li .lhandle a { color:#adff2f; text-decoration:none; }
-#leaderList li .lhandle a:hover { text-decoration:underline; }
-#leaderList li .lscore { color:#adff2f; font-weight:bold; }
-#leaderList li.lb-you .lhandle a { color:#fff; }
-#leaderList li.lb-you .lscore { color:#fff; }
-#lbStatus { font-size:clamp(9px,1.6vw,11px); color:#2d6a1e; margin-top:4px; }
-
-/* ── USERNAME INPUT ── */
-.xrow {
-    margin-top:12px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    gap:8px;
-}
-.xrow label {
-    font-size:clamp(10px,2vw,13px);
-    color:#4d7c0f;
-    white-space:nowrap;
-}
-.xrow input {
-    background:#0a200a;
-    border:2px solid #4d7c0f;
-    color:#adff2f;
-    font-family:'Courier New',monospace;
-    font-size:clamp(11px,2.2vw,14px);
-    padding:5px 10px;
-    width:clamp(130px,32vw,210px);
-    outline:none;
-    letter-spacing:1px;
-}
-.xrow input:focus { border-color:#adff2f; }
-.xrow input::placeholder { color:#2d6a1e; }
-
-/* ── PLAYER TAG (in-game corner) ── */
+/* ═══════════════════════════════════════════
+   IN-GAME PLAYER TAG
+═══════════════════════════════════════════ */
 #playerTag {
-    position:fixed; bottom:6px; left:8px;
+    position:fixed; bottom:6px; left:10px;
     font-family:'Courier New',monospace;
     font-size:clamp(9px,1.8vw,12px);
     color:#2d6a1e;
@@ -145,7 +307,9 @@ canvas {
 }
 #playerTag:hover { color:#adff2f; }
 
-/* ── TOUCH CONTROLS ── */
+/* ═══════════════════════════════════════════
+   TOUCH CONTROLS
+═══════════════════════════════════════════ */
 #touchLeft, #touchRight {
     position:fixed; bottom:50px;
     width:90px; height:90px;
@@ -179,23 +343,9 @@ canvas {
     #touchLeft, #touchRight, #touchFire { display:flex; }
 }
 
-/* ── MADE WITH LOVE ── */
-#madeWith {
-    position:fixed; bottom:8px; right:10px;
-    font-family:'Courier New',monospace;
-    font-size:clamp(8px,1.6vw,11px);
-    color:#1a3d0a;
-    letter-spacing:1px;
-    z-index:21;
-    pointer-events:auto;
-    white-space:nowrap;
-}
-#madeWith a {
-    color:#2d6a1e;
-    text-decoration:none;
-}
-#madeWith a:hover { color:#adff2f; }
-
+/* ═══════════════════════════════════════════
+   BOSS WARNING
+═══════════════════════════════════════════ */
 #bossWarn {
     position:fixed; top:50%; left:50%;
     transform:translate(-50%,-50%);
@@ -214,56 +364,107 @@ canvas {
 
 <canvas id="c"></canvas>
 
+<!-- In-game HUD -->
 <div id="hud">
     <span id="hScore">SCORE: 00000</span>
     <span id="hBest">BEST: 00000</span>
     <span id="hWave">WAVE: 1</span>
 </div>
 
-<!-- In-game player tag (bottom-left) -->
+<!-- In-game player tag -->
 <a id="playerTag" href="#" target="_blank" rel="noopener"></a>
 
+<!-- ═══ OVERLAY (lobby + game-over) ═══ -->
 <div id="overlay">
-    <!-- ── START PANEL ── -->
-    <div class="panel" id="startPanel">
-        <h1>SPACE IMPACT 2077</h1>
-        <p>Bad aliens are invading Earth &mdash; be the last line of defence!</p>
-        <p>Survive the boss &middot; Collect power-ups &middot; Protect the planet</p>
 
-        <!-- Global leaderboard -->
-        <div id="leaderBlock">
-            <div class="lb-title">&#9733; LEADERBOARD &#9733;</div>
-            <ul id="leaderList"><li style="color:#2d6a1e;font-size:12px;justify-content:center">Loading...</li></ul>
-            <div id="lbStatus"></div>
+    <!-- ── FULL-SCREEN LOBBY ── -->
+    <div id="startPanel">
+
+        <!-- HEADER -->
+        <div class="lobby-header">
+            <div class="lobby-title">SPACE IMPACT 2077</div>
+            <div class="lobby-sub">Bad aliens are invading Earth &mdash; be the last line of defence</div>
         </div>
 
-        <!-- X handle input -->
-        <div class="xrow">
-            <label>X handle:</label>
-            <input id="xInput" type="text" maxlength="30" placeholder="@yourusername (optional)" spellcheck="false" autocomplete="off">
+        <!-- MAIN: leaderboard + identity -->
+        <div class="lobby-main">
+
+            <!-- leaderboard -->
+            <div class="lb-card">
+                <h2>&#9733; LEADERBOARD &#9733;</h2>
+                <ul id="leaderList">
+                    <li><span class="lb-empty" style="grid-column:1/-1">Loading...</span></li>
+                </ul>
+            </div>
+
+            <!-- identity + controls -->
+            <div class="id-card">
+
+                <div class="id-section">
+                    <h2>YOUR IDENTITY</h2>
+                    <div class="x-label">X (TWITTER) HANDLE</div>
+                    <input id="xInput" type="text" maxlength="30"
+                           placeholder="@yourusername"
+                           spellcheck="false" autocomplete="off">
+                    <div class="x-hint">Saved in your browser &middot; shown on leaderboard</div>
+                </div>
+
+                <div class="id-section">
+                    <h2>CONTROLS</h2>
+                    <div class="ctrl-grid">
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">&#9664; &#9654; / A D</span>
+                            <span class="ctrl-desc">Move ship</span>
+                        </div>
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">SPACE</span>
+                            <span class="ctrl-desc">Shoot</span>
+                        </div>
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">&#10084; Pack</span>
+                            <span class="ctrl-desc">Restore health</span>
+                        </div>
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">&#9679; Pack</span>
+                            <span class="ctrl-desc">Refill ammo</span>
+                        </div>
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">&#11835; Pack</span>
+                            <span class="ctrl-desc">Shield bubble</span>
+                        </div>
+                        <div class="ctrl-item">
+                            <span class="ctrl-key">&#9889; Pack</span>
+                            <span class="ctrl-desc">Triple shot</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
-        <small>ARROW KEYS / A D &mdash; Move &nbsp;|&nbsp; SPACE &mdash; Shoot</small>
-        <small>Mobile: use the on-screen buttons</small>
-        <button id="btnStart">&#9654; START</button>
-    </div>
+        <!-- FOOTER -->
+        <div class="lobby-footer">
+            <button id="btnStart">&#9654;&nbsp; START GAME</button>
+            <div class="footer-made">
+                Made with &#9829; by
+                <a href="https://x.com/0xAkashDev" target="_blank" rel="noopener">@0xAkashDev</a>
+            </div>
+        </div>
 
-    <!-- ── GAME OVER PANEL ── -->
-    <div class="panel" id="overPanel" style="display:none">
+    </div><!-- /#startPanel -->
+
+    <!-- ── GAME-OVER CARD ── -->
+    <div id="overPanel" style="display:none">
         <h1>GAME OVER</h1>
         <p id="oScore">SCORE: 0</p>
         <p id="oBest">BEST: 0</p>
-        <p id="oGlobal" style="font-size:clamp(10px,2vw,13px);color:#4d7c0f;margin-top:4px;"></p>
+        <p id="oGlobal"></p>
         <button id="btnRestart">&#9654; PLAY AGAIN</button>
     </div>
-</div>
 
-<!-- Made with love -->
-<div id="madeWith">
-    Made with &#9829; &nbsp;
-    <a href="https://x.com/0xAkashDev" target="_blank" rel="noopener">@0xAkashDev</a>
-</div>
+</div><!-- /#overlay -->
 
+<!-- Touch controls -->
 <div id="touchLeft">&#9664;</div>
 <div id="touchRight">&#9654;</div>
 <div id="touchFire">FIRE</div>
@@ -271,25 +472,23 @@ canvas {
 
 <script>
 // ================================================================
-//  GLOBAL LEADERBOARD — GitHub Gist (no Firebase, no backend)
+//  GLOBAL LEADERBOARD — GitHub Gist
 //
 //  One-time setup (2 min):
-//  1. Go to https://gist.github.com
-//     New gist → filename: scores.json → content: {"scores":[]}
-//     → Create PUBLIC gist
-//     → Copy the Gist ID from the URL (32-char hex string)
+//  1. https://gist.github.com → New gist
+//     filename: scores.json  |  content: {"scores":[]}
+//     → Create PUBLIC gist → copy 32-char Gist ID from URL
 //
-//  2. Go to https://github.com/settings/tokens
-//     Generate new token (classic) → check ONLY "gist" scope → copy it
+//  2. https://github.com/settings/tokens → Generate new token (classic)
+//     check ONLY "gist" scope → copy token
 //
 //  3. Paste both below ↓
 // ================================================================
-const GIST_ID    = 'YOUR_GIST_ID_HERE';        // ← replace
-const GIST_TOKEN = 'YOUR_GIST_TOKEN_HERE';     // ← replace (gist scope only)
+const GIST_ID    = 'YOUR_GIST_ID_HERE';    // ← replace
+const GIST_TOKEN = 'YOUR_GIST_TOKEN_HERE'; // ← replace
 const GIST_FILE  = 'scores.json';
 const MAX_SCORES = 10;
 
-// ── helpers ──────────────────────────────────────────────────────
 function cleanHandle(v) {
     v = (v || '').trim();
     if (v.startsWith('@')) v = v.slice(1);
@@ -300,7 +499,6 @@ function xLink(h) {
     return `<a href="https://x.com/${h}" target="_blank" rel="noopener">@${h}</a>`;
 }
 
-// ── fetch scores from gist ────────────────────────────────────────
 async function fetchScores() {
     try {
         const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
@@ -313,7 +511,6 @@ async function fetchScores() {
     } catch(e) { return null; }
 }
 
-// ── write scores to gist ─────────────────────────────────────────
 async function writeScores(scores) {
     await fetch(`https://api.github.com/gists/${GIST_ID}`, {
         method: 'PATCH',
@@ -328,28 +525,26 @@ async function writeScores(scores) {
     });
 }
 
-// ── render leaderboard ────────────────────────────────────────────
 function renderLeaderboard(entries, myHandle) {
     const ul = document.getElementById('leaderList');
-    const configured = GIST_ID !== 'YOUR_GIST_ID_HERE';
-    if (!configured) {
-        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">Leaderboard not configured yet</li>';
+    if (GIST_ID === 'YOUR_GIST_ID_HERE') {
+        ul.innerHTML = '<li><span class="lb-empty" style="grid-column:1/-1">Leaderboard coming soon</span></li>';
         return;
     }
     if (!entries) {
-        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">Could not load scores</li>';
+        ul.innerHTML = '<li><span class="lb-empty" style="grid-column:1/-1">Could not load scores</span></li>';
         return;
     }
     if (entries.length === 0) {
-        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">No scores yet — be first!</li>';
+        ul.innerHTML = '<li><span class="lb-empty" style="grid-column:1/-1">No scores yet &mdash; be first!</span></li>';
         return;
     }
-    const medals = ['#1','#2','#3','#4','#5'];
-    const top = [...entries].sort((a,b) => b.score - a.score).slice(0, 5);
+    const top = [...entries].sort((a,b) => b.score - a.score).slice(0, 10);
     ul.innerHTML = top.map((e, i) => {
         const mine = myHandle && cleanHandle(e.handle) === cleanHandle(myHandle);
-        return `<li${mine?' class="lb-you"':''}>
-            <span class="lrank">${medals[i]}</span>
+        const ranks = ['01','02','03','04','05','06','07','08','09','10'];
+        return `<li${mine ? ' class="lb-you"' : ''}>
+            <span class="lrank">#${ranks[i]}</span>
             <span class="lhandle">${xLink(cleanHandle(e.handle))}</span>
             <span class="lscore">${String(e.score).padStart(6,'0')}</span>
         </li>`;
@@ -362,22 +557,21 @@ async function loadAndRender() {
     renderLeaderboard(scores, handle);
 }
 
-// ── submit score ──────────────────────────────────────────────────
 window.submitScore = async function(score, rawHandle) {
-    if (GIST_ID === 'YOUR_GIST_ID_HERE') return;   // not configured
+    if (GIST_ID === 'YOUR_GIST_ID_HERE') return;
     const handle = cleanHandle(rawHandle) || 'Anonymous';
     const oGlobal = document.getElementById('oGlobal');
     try {
         const scores = await fetchScores() || [];
         const idx = scores.findIndex(e => cleanHandle(e.handle) === handle);
         if (idx >= 0) {
-            if (scores[idx].score >= score) return;   // no improvement
+            if (scores[idx].score >= score) return;
             scores[idx] = { score, handle, ts: Date.now() };
         } else {
             scores.push({ score, handle, ts: Date.now() });
         }
         scores.sort((a,b) => b.score - a.score);
-        scores.splice(MAX_SCORES);   // keep top 10
+        scores.splice(MAX_SCORES);
         await writeScores(scores);
         if (oGlobal) oGlobal.textContent = 'Score saved to leaderboard!';
     } catch(e) {
@@ -385,7 +579,7 @@ window.submitScore = async function(score, rawHandle) {
     }
 };
 
-// ── username persistence & player tag ────────────────────────────
+// ── Username persistence + player in-game tag ──
 (function() {
     const xInput    = document.getElementById('xInput');
     const playerTag = document.getElementById('playerTag');
@@ -407,7 +601,7 @@ window.submitScore = async function(score, rawHandle) {
     xInput.addEventListener('input', applyTag);
     applyTag();
 
-    // Refresh leaderboard when overlay becomes visible
+    // Reload leaderboard each time lobby becomes visible
     const observer = new MutationObserver(() => {
         if (!document.getElementById('overlay').classList.contains('hidden')) {
             loadAndRender();
@@ -415,7 +609,6 @@ window.submitScore = async function(score, rawHandle) {
     });
     observer.observe(document.getElementById('overlay'), { attributes: true });
 
-    // Initial load
     loadAndRender();
 })();
 </script>
