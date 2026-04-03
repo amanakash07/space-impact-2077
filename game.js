@@ -158,56 +158,87 @@ function mkPlanet(y) {
         spd: 0.15 + Math.random() * 0.2 };
 }
 
-function drawPixelCircle(cx, cy, r, col, shadeCol) {
-    // pixel-art circle: draw filled squares in a circle pattern
-    for (let dy = -r; dy <= r; dy++) {
-        for (let dx = -r; dx <= r; dx++) {
-            if (dx*dx + dy*dy <= r*r) {
-                // shade the top-left quadrant slightly darker
-                ctx.fillStyle = (dx < 0 && dy < 0) ? shadeCol : col;
-                ctx.fillRect(Math.round(cx + dx), Math.round(cy + dy), 1, 1);
-            }
-        }
+function drawPlanet(cx, cy, r, col, shadeCol, hasRing) {
+    cx = Math.round(cx); cy = Math.round(cy);
+
+    // draw ring BEHIND planet first
+    if (hasRing) {
+        const rw = Math.round(r * 2.6);
+        const rh = Math.round(r * 0.45);
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        // outer ring
+        ctx.fillStyle = shadeCol;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI * 2);
+        ctx.fill();
+        // inner ring gap (cut with planet base color)
+        ctx.fillStyle = '#0a1a05';
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rw * 0.6, rh * 0.55, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
     }
+
+    // planet body — filled circle
+    ctx.save();
+    ctx.globalAlpha = 0.75;
+    ctx.fillStyle = col;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fill();
+
+    // crescent shadow on right side (NOT a quadrant, just a partial arc)
+    ctx.fillStyle = shadeCol;
+    ctx.globalAlpha = 0.55;
+    ctx.beginPath();
+    ctx.arc(cx + r * 0.25, cy, r * 0.82, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r, Math.PI * 2, 0, true); // subtract planet circle
+    ctx.fill();
+
+    // small bright highlight dot top-left
+    ctx.fillStyle = '#adff2f';
+    ctx.globalAlpha = 0.25;
+    ctx.beginPath();
+    ctx.arc(cx - r * 0.35, cy - r * 0.35, r * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    // draw ring IN FRONT of planet (lower half only) to give depth
+    if (hasRing) {
+        const rw = Math.round(r * 2.6);
+        const rh = Math.round(r * 0.45);
+        ctx.globalAlpha = 0.45;
+        ctx.fillStyle = shadeCol;
+        ctx.beginPath();
+        ctx.ellipse(cx, cy, rw, rh, 0, 0, Math.PI);  // bottom half only
+        ctx.fill();
+    }
+    ctx.restore();
 }
 
 function drawBG() {
-    // deep space background — dark greenish-black
     ctx.fillStyle = '#0a1a05';
     ctx.fillRect(0, 0, W, H);
 
     bgObjs.forEach(o => {
         o.y += o.spd;
-        if (o.y > H + (o.r || 5) * 2) {
-            if (o.type === 'star')   Object.assign(o, { x: Math.random()*W, y: -4 });
-            else                     Object.assign(o, mkPlanet(-80));
+        if (o.y > H + (o.r || 5) * 2 + 60) {
+            if (o.type === 'star') Object.assign(o, { x: Math.random()*W, y: -4 });
+            else                   Object.assign(o, mkPlanet(-(o.r * 2 + 60)));
         }
 
         if (o.type === 'star') {
-            ctx.globalAlpha = 0.55 + Math.random() * 0.15; // twinkle
+            // twinkle: only update alpha every few frames
+            ctx.globalAlpha = 0.4 + (Math.sin(Date.now() * 0.003 + o.x) * 0.5 + 0.5) * 0.5;
             ctx.fillStyle = BRIGHT;
             ctx.fillRect(o.x, o.y, o.sz, o.sz);
             ctx.globalAlpha = 1;
         } else {
-            // planet body
-            ctx.globalAlpha = 0.55;
-            drawPixelCircle(o.x, o.y, o.r, o.col, o.shade);
-            // ring if applicable
-            if (o.ring) {
-                ctx.fillStyle = o.shade;
-                ctx.globalAlpha = 0.4;
-                const rw = Math.round(o.r * 2.2), rh = Math.round(o.r * 0.4);
-                ctx.fillRect(Math.round(o.x - rw/2), Math.round(o.y - rh/2), rw, rh);
-                // cut out planet center from ring
-                ctx.fillStyle = o.col;
-                ctx.globalAlpha = 0.55;
-                drawPixelCircle(o.x, o.y, o.r, o.col, o.shade);
-            }
-            ctx.globalAlpha = 1;
+            drawPlanet(o.x, o.y, o.r, o.col, o.shade, o.ring);
         }
     });
 
-    // scrolling ground stripe (subtle)
+    // scrolling ground stripe
     bgOff = (bgOff + 0.8) % 80;
     ctx.fillStyle = '#0f2208';
     ctx.fillRect(0, H - 12, W, 12);
@@ -242,6 +273,7 @@ function playClone(audio) {
 }
 const SND = {
     _shot:      loadAudio('Asset/Shot.wav',            0.5),
+    _eshot:     loadAudio('Asset/crash.wav',           0.18), // enemy shoot: quiet crash
     _crash:     loadAudio('Asset/crash.wav',           0.7),
     _waveDone:  loadAudio('Asset/wave pass.wav',       0.6),
     _health:    loadAudio('Asset/Health Loaded.wav',   0.7),
@@ -249,7 +281,7 @@ const SND = {
     _lobby:     loadAudio('Asset/Lobby.wav',           0.35, true),
 
     shoot:      function() { playClone(this._shot); },
-    eShoot:     function() { playClone(this._shot); },
+    eShoot:     function() { playClone(this._eshot); },
     hit:        function() { playClone(this._crash); },
     explode:    function() { playClone(this._crash); },
     bossHit:    function() { playClone(this._crash); },
@@ -531,8 +563,8 @@ class Enemy {
         this.vy  = 1.2 + Math.random() * 0.9 + wave * 0.12;
         this.hp  = 1 + Math.floor(wave / 5);
         this.maxHp = this.hp;
-        this.sTmr  = 30 + Math.random() * 80;
-        this.sRate = Math.max(50, 110 - wave * 4);
+        this.sTmr  = 60 + Math.random() * 100;  // longer initial delay before first shot
+        this.sRate = Math.max(80, 140 - wave * 4); // slower fire rate = more gap between bullets
         this.bullets = [];
         this.flash = 0;
     }
@@ -541,7 +573,7 @@ class Enemy {
         this.y += this.vy;
         this.sTmr++;
         if (this.sTmr >= this.sRate) {
-            this.bullets.push(new EBullet(this.cx(), this.cy(), 0, 4.5));
+            this.bullets.push(new EBullet(this.cx(), this.cy(), 0, 3.5)); // slower bullet = easier to dodge
             SND.eShoot();
             this.sTmr = 0;
         }
@@ -633,10 +665,10 @@ class Boss {
         this.t      = 0;
         this.miniSpawnT = 0;
         // burst-pause pattern
-        this.burstCount = 0;     // shots fired in current burst
-        this.burstMax   = 3;     // fire N shots then pause
-        this.pauseTimer = 0;     // countdown pause between bursts
-        this.PAUSE_DUR  = 90;    // ~1.5 sec pause
+        this.burstCount = 0;
+        this.burstMax   = 4;     // 4 shots per burst
+        this.pauseTimer = 0;
+        this.PAUSE_DUR  = 80;    // ~1.3 sec pause
     }
     tick(px, py) {
         this.t++; if (this.flash > 0) this.flash--;
@@ -658,7 +690,7 @@ class Boss {
             this.pauseTimer--;
         } else {
             this.sTmr++;
-            const rate = this.phase === 2 ? 30 : 50;
+            const rate = this.phase === 2 ? 22 : 38;
             if (this.sTmr >= rate) {
                 this.shoot(px, py); this.sTmr = 0; this.sPhase++;
                 this.burstCount++;
@@ -677,17 +709,18 @@ class Boss {
     }
     shoot(px, py) {
         const cx = this.cx(), cy = this.y + this.h;
-        const spd = 4.0;
+        const spd = 4.5;
         if (this.phase === 2) {
-            // enraged: 3-way narrow fan downward only
-            for (let i = 0; i < 3; i++) {
-                const a = (Math.PI / 2) + (i - 1) * 0.2;
+            // enraged: 5-way fan, all pointing downward, spaced 0.22 rad
+            for (let i = 0; i < 5; i++) {
+                const a = (Math.PI / 2) + (i - 2) * 0.22;
                 this.bullets.push(new EBullet(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd));
             }
         } else {
-            // normal: single aimed shot straight at player
+            // normal: aimed double-shot (slight left/right offset)
             const [vx, vy] = aimed(cx, cy, px, py, spd);
-            this.bullets.push(new EBullet(cx, cy, vx, vy));
+            this.bullets.push(new EBullet(cx - 6, cy, vx, vy));
+            this.bullets.push(new EBullet(cx + 6, cy, vx, vy));
         }
         SND.bossShoot();
     }
@@ -865,14 +898,19 @@ function loop() {
 
     time++; score++;
 
-    // spawn regular enemies
+    // spawn regular enemies — enforce min horizontal gap between ships
     if (!bossMode) {
         spawnT++;
-        const rate = Math.max(28, 72 - wave * 3);
+        const rate = Math.max(50, 90 - wave * 3); // slower spawn = more gaps
         if (spawnT >= rate) {
-            enemies.push(new Enemy(wave));
-            if (wave >= 3 && Math.random() < 0.35) enemies.push(new Enemy(wave));
-            if (wave >= 6 && Math.random() < 0.2)  enemies.push(new Enemy(wave));
+            const newE = new Enemy(wave);
+            // check min spacing of 80px from existing enemies
+            const tooClose = enemies.some(e => Math.abs(e.x - newE.x) < 80);
+            if (!tooClose) enemies.push(newE);
+            if (wave >= 3 && Math.random() < 0.25) {
+                const e2 = new Enemy(wave);
+                if (!enemies.some(e => Math.abs(e.x - e2.x) < 80)) enemies.push(e2);
+            }
             spawnT = 0;
         }
         bossTimer++;
