@@ -305,7 +305,6 @@ function boom(x, y, big) {
             life: 20 + Math.random()*25, max: 45, sz: big ? 7 : 4,
             col: Math.random() > 0.5 ? BRIGHT : ACC });
     }
-    SND.explode();
 }
 
 // Floating text particles (for +++ pickup effect)
@@ -574,7 +573,7 @@ class Enemy {
         this.sTmr++;
         if (this.sTmr >= this.sRate) {
             this.bullets.push(new EBullet(this.cx(), this.cy(), 0, 3.5)); // slower bullet = easier to dodge
-            SND.eShoot();
+            
             this.sTmr = 0;
         }
         this.bullets = this.bullets.filter(b => { b.tick(); return b.alive(); });
@@ -621,7 +620,7 @@ class MiniEnemy {
         this.sTmr++;
         if (this.sTmr >= this.sRate) {
             this.bullets.push(new EBullet(this.cx(), this.cy(), 0, 4.0));
-            SND.eShoot();
+            
             this.sTmr = 0;
         }
         this.bullets = this.bullets.filter(b => { b.tick(); return b.alive(); });
@@ -722,13 +721,13 @@ class Boss {
             this.bullets.push(new EBullet(cx - 6, cy, vx, vy));
             this.bullets.push(new EBullet(cx + 6, cy, vx, vy));
         }
-        SND.bossShoot();
+        
     }
     hit() {
         this.hp--; this.flash = 7;
         if (Math.random() < 0.35)
             boom(this.x + this.w * Math.random(), this.y + this.h * Math.random(), false);
-        SND.bossHit();
+        
         return this.hp <= 0;
     }
     draw() {
