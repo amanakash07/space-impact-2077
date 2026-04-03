@@ -335,7 +335,6 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
         <h1>GAME OVER</h1>
         <p id="oScore">SCORE: 0</p>
         <p id="oBest">BEST: 0</p>
-        <p id="oGlobal"></p>
         <button id="btnRestart">&#9654; PLAY AGAIN</button>
     </div>
 
@@ -448,9 +447,7 @@ window.submitScore = async function(score, rawHandle) {
             }
         }
 
-        if (oGlobal) oGlobal.textContent = 'Score saved to leaderboard!';
     } catch(e) {
-        if (oGlobal) oGlobal.textContent = '';
     }
 };
 
