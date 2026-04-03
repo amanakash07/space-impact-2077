@@ -590,7 +590,7 @@ class Enemy {
         // forcedX lets boss spawn minions at specific positions
         this.x   = forcedX !== undefined ? forcedX : 10 + Math.random() * (W - this.w - 20);
         this.y   = -this.h - 5;
-        this.vy  = 1.2 + Math.random() * 0.9 + wave * 0.12;
+        this.vy  = 0.9 + Math.random() * 0.7 + wave * 0.10;
         this.hp  = 1 + Math.floor(wave / 5);
         this.maxHp = this.hp;
         this.sTmr  = 60 + Math.random() * 100;  // longer initial delay before first shot
