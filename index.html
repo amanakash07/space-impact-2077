@@ -47,13 +47,11 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 #overlay:not(.hidden) ~ #touchFire { display:none !important; }
 
 /* ══════════════════════════════════════
-   FULL-SCREEN LOBBY
+   FULL-SCREEN LOBBY  — bright neon bg, dark text
 ══════════════════════════════════════ */
 #startPanel {
     position:absolute; inset:0;
-    background:
-        radial-gradient(ellipse at 50% 25%, rgba(173,255,47,0.1) 0%, transparent 60%),
-        linear-gradient(180deg, #020d01 0%, #041202 50%, #020d01 100%);
+    background: #adff2f;
     display:flex;
     flex-direction:column;
     align-items:center;
@@ -68,18 +66,14 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     font-size:clamp(38px,9vw,110px);
     font-weight:bold;
     letter-spacing:clamp(6px,2vw,20px);
-    color:#adff2f;
-    text-shadow:
-        0 0 10px #adff2f,
-        0 0 30px rgba(173,255,47,0.7),
-        0 0 70px rgba(173,255,47,0.3);
+    color:#0a1f05;
     line-height:1;
 }
 .lob-sub {
     margin-top:clamp(10px,2vh,20px);
     font-size:clamp(15px,2.6vw,28px);
     font-weight:bold;
-    color:#6ab04c;
+    color:#1a3d0a;
     letter-spacing:1px;
 }
 
@@ -97,28 +91,29 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 .lob-ctrl {
     font-size:clamp(13px,2vw,20px);
     font-weight:bold;
-    color:#4d7c0f;
+    color:#1a3d0a;
     letter-spacing:2px;
-    border:1px solid #2d6a1e;
+    border:2px solid #1a3d0a;
     padding:10px 28px;
     width:100%;
+    background:rgba(0,0,0,0.08);
 }
 
 /* X HANDLE */
 .lob-x-label {
     font-size:clamp(12px,1.8vw,18px);
     font-weight:bold;
-    color:#4d7c0f;
+    color:#1a3d0a;
     letter-spacing:4px;
     margin-bottom:10px;
 }
 #xInput {
     width:100%;
     max-width:440px;
-    background:transparent;
+    background:rgba(0,0,0,0.12);
     border:none;
-    border-bottom:2px solid #2d6a1e;
-    color:#adff2f;
+    border-bottom:3px solid #1a3d0a;
+    color:#0a1f05;
     font-family:'Courier New',monospace;
     font-size:clamp(20px,3.2vw,32px);
     font-weight:bold;
@@ -128,8 +123,8 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     text-align:center;
     transition:border-color 0.2s;
 }
-#xInput:focus { border-bottom-color:#adff2f; }
-#xInput::placeholder { color:#1a3d0a; font-weight:normal; }
+#xInput:focus { border-bottom-color:#0a1f05; }
+#xInput::placeholder { color:#4d7c0f; font-weight:normal; }
 
 /* START BUTTON */
 #btnStart {
@@ -138,21 +133,20 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     font-family:'Courier New',monospace;
     font-weight:bold;
     letter-spacing:6px;
-    background:transparent;
+    background:#0a1f05;
     color:#adff2f;
-    border:2px solid #adff2f;
+    border:3px solid #0a1f05;
     cursor:pointer;
-    box-shadow:0 0 18px rgba(173,255,47,0.25), inset 0 0 18px rgba(173,255,47,0.05);
-    transition:box-shadow 0.2s, background 0.2s;
+    transition:background 0.2s, transform 0.1s;
 }
-#btnStart:hover  { background:rgba(173,255,47,0.08); box-shadow:0 0 32px rgba(173,255,47,0.5); }
-#btnStart:active { background:rgba(173,255,47,0.15); }
+#btnStart:hover  { background:#1a3d0a; }
+#btnStart:active { transform:scale(0.97); }
 
 /* TOP 3 SCORES */
 .lob-scores-title {
     font-size:clamp(13px,1.9vw,20px);
     font-weight:bold;
-    color:#4d7c0f;
+    color:#1a3d0a;
     letter-spacing:4px;
     margin-bottom:10px;
 }
@@ -165,37 +159,35 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:9px 4px;
-    border-bottom:1px solid #0d2208;
+    padding:9px 6px;
+    border-bottom:2px solid rgba(0,0,0,0.15);
     font-size:clamp(15px,2.4vw,24px);
     font-weight:bold;
     letter-spacing:1px;
 }
 #leaderList li:last-child { border:none; }
 .lrank  { color:#2d6a1e; min-width:44px; text-align:left; }
-.lhandle a { color:#adff2f; text-decoration:none; }
-.lhandle a:hover { text-shadow:0 0 8px #adff2f; }
+.lhandle a { color:#0a1f05; text-decoration:none; }
+.lhandle a:hover { text-decoration:underline; }
 .lhandle span { color:#2d6a1e; }
-.lscore { color:#6ab04c; }
+.lscore { color:#1a3d0a; }
+#leaderList li.lb-you { background:rgba(0,0,0,0.1); }
 #leaderList li.lb-you .lhandle a,
-#leaderList li.lb-you .lscore { color:#fff; }
+#leaderList li.lb-you .lscore { color:#000; }
 
 /* FOOTER */
 .lob-footer {
     font-size:clamp(16px,2.8vw,30px);
     font-weight:bold;
-    color:#2d6a1e;
+    color:#1a3d0a;
     letter-spacing:2px;
 }
 .lob-footer a {
-    color:#4d7c0f;
+    color:#0a1f05;
     text-decoration:none;
-    transition:color 0.2s, text-shadow 0.2s;
+    transition:opacity 0.2s;
 }
-.lob-footer a:hover {
-    color:#adff2f;
-    text-shadow:0 0 10px rgba(173,255,47,0.7);
-}
+.lob-footer a:hover { opacity:0.7; }
 
 /* ══════════════════════════════════════
    GAME-OVER CARD
