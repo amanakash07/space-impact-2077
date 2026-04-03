@@ -22,8 +22,8 @@ const ACC    = '#4d7c0f';
 const BRIGHT = '#adff2f';
 const GROUND = '#4a7a34';
 const GLINE  = '#3a6228';
-const SHIELD_COL = '#00e5ff';
-const HEART_COL  = BRIGHT;   // same green palette
+const SHIELD_COL = BRIGHT;   // lime green shield
+const HEART_COL  = BRIGHT;
 
 // ── SPRITE RENDERER ──────────────────────────────────────────────
 function spr(grid, cols, x, y, ps, flipY) {
@@ -41,19 +41,23 @@ function spr(grid, cols, x, y, ps, flipY) {
 }
 
 // ── SPRITES ──────────────────────────────────────────────────────
+// Player — 12 wide × 14 tall — proper fighter jet, sharp nose, wide delta wings
+// 1=dark outline  2=body  3=cockpit/highlight
 const P_SPR = [
-    [0,0,0,1,1,1,0,0,0,0],
-    [0,0,1,2,2,2,1,0,0,0],
-    [0,0,1,2,3,2,1,0,0,0],
-    [0,1,1,2,2,2,1,1,0,0],
-    [1,1,2,2,2,2,2,1,1,0],
-    [1,2,2,2,2,2,2,2,1,0],
-    [1,2,2,2,2,2,2,2,1,0],
-    [1,1,2,1,2,2,1,2,1,1],
-    [0,1,1,1,2,2,1,1,1,0],
-    [0,0,0,1,2,2,1,0,0,0],
-    [0,0,0,0,1,1,0,0,0,0],
-    [0,0,0,0,1,1,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,1,2,2,1,0,0,0,0],
+    [0,0,0,0,1,3,3,1,0,0,0,0],
+    [0,0,0,1,1,2,2,1,1,0,0,0],
+    [0,0,1,1,2,2,2,2,1,1,0,0],
+    [0,1,1,2,2,2,2,2,2,1,1,0],
+    [1,1,2,2,2,2,2,2,2,2,1,1],
+    [1,2,2,1,2,2,2,2,1,2,2,1],
+    [1,1,2,1,1,2,2,1,1,2,1,1],
+    [0,1,1,1,1,2,2,1,1,1,1,0],
+    [0,0,0,1,1,2,2,1,1,0,0,0],
+    [0,0,0,0,1,2,2,1,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0],
+    [0,0,0,0,0,1,1,0,0,0,0,0],
 ];
 const P_COLS = [DARK, MID, BRIGHT];
 
@@ -86,6 +90,35 @@ const B_SPR = [
     [0,0,0,0,1,1,2,2,1,1,0,0,0,0,0,0],
 ];
 const B_COLS = [DARK, MID, ACC, '#cc5500', '#d4f06b'];
+
+// Laser enemy — 8 wide × 8 tall — sleek narrow, front cannon
+// 1=dark  2=body  3=laser emitter (bright)
+const EL_SPR = [
+    [0,0,1,1,1,1,0,0],
+    [0,1,2,3,3,2,1,0],
+    [1,1,2,2,2,2,1,1],
+    [1,2,3,2,2,3,2,1],
+    [1,2,3,2,2,3,2,1],
+    [1,1,2,2,2,2,1,1],
+    [0,0,1,2,2,1,0,0],
+    [0,0,0,1,1,0,0,0],
+];
+const EL_COLS = [DARK, ACC, BRIGHT];
+
+// Fire enemy — 10 wide × 9 tall — fat hulk with flame vents
+// 1=dark  2=body  3=mid  4=fire orange
+const EF_SPR = [
+    [0,0,0,1,1,1,1,0,0,0],
+    [0,0,1,2,2,2,2,1,0,0],
+    [0,1,2,3,2,2,3,2,1,0],
+    [1,2,4,4,2,2,4,4,2,1],
+    [1,2,4,4,2,2,4,4,2,1],
+    [1,2,3,2,2,2,2,3,2,1],
+    [0,1,2,2,2,2,2,2,1,0],
+    [0,1,1,2,2,2,2,1,1,0],
+    [0,0,1,1,0,0,1,1,0,0],
+];
+const EF_COLS = [DARK, MID, ACC, '#cc5500'];
 
 // Heart powerup icon  7×7
 const H_SPR = [
@@ -472,7 +505,7 @@ class Player {
         }
         this.hp--; this.inv = 55;
         boom(this.cx(), this.cy(), false);
-        SND.hit();
+        if (this.hp <= 0) SND.hit();  // crash sound only on death
         return this.hp <= 0;
     }
     addHeart() {
@@ -514,20 +547,18 @@ class Player {
             ctx.globalAlpha = 1;
         }
 
-        // +++ health anim — pixel plus signs orbiting ship
+        // health pickup — 3 glowing + signs gently rising above ship
         if (this.plusAnim > 0) {
-            const a = this.plusAnim;
-            ctx.globalAlpha = Math.min(1, a / 40);
+            const prog = this.plusAnim / 80;
+            ctx.globalAlpha = prog;
             ctx.fillStyle = HEART_COL;
-            const r = this.w * 0.9 + (80 - a) * 0.3;
-            for (let i = 0; i < 4; i++) {
-                const ang = (i / 4) * Math.PI * 2 + a * 0.06;
-                const px = this.cx() + Math.cos(ang) * r;
-                const py = this.cy() + Math.sin(ang) * r;
-                // draw small "+" shape
+            const offsets = [-18, 0, 18];
+            offsets.forEach(ox => {
+                const px = this.cx() + ox;
+                const py = this.y - 10 - (1 - prog) * 30; // rise upward
                 ctx.fillRect(px - 5, py - 1, 10, 3);
                 ctx.fillRect(px - 1, py - 5, 3, 10);
-            }
+            });
             ctx.globalAlpha = 1;
         }
 
@@ -598,12 +629,12 @@ class Enemy {
     cy() { return this.y + this.h / 2; }
 }
 
-// ── MINI ENEMY (spawned alongside boss) ──────────────────────────
+// ── MINI ENEMY (spawned alongside boss — looks like tiny boss) ───
 class MiniEnemy {
     constructor(wave) {
-        this.ps  = Math.max(1, Math.floor(Math.min(W, H) / 140)); // smaller
-        this.pw  = E_SPR[0].length;
-        this.ph  = E_SPR.length;
+        this.ps  = Math.max(1, Math.floor(Math.min(W, H) / 160)); // tiny boss scale
+        this.pw  = B_SPR[0].length;
+        this.ph  = B_SPR.length;
         this.w   = this.pw * this.ps;
         this.h   = this.ph * this.ps;
         this.x   = 10 + Math.random() * (W - this.w - 20);
@@ -634,7 +665,7 @@ class MiniEnemy {
             ctx.fillRect(this.x, this.y, this.w, this.h);
             ctx.globalAlpha = 1;
         }
-        spr(E_SPR, E_COLS, this.x, this.y, this.ps, true);
+        spr(B_SPR, B_COLS, this.x, this.y, this.ps, true);
         this.bullets.forEach(b => b.draw());
     }
     cx() { return this.x + this.w / 2; }
@@ -652,7 +683,7 @@ class Boss {
         this.x  = W / 2 - this.w / 2;
         this.y  = -this.h;
         this.targetY = 40;
-        this.hp = 20 + wave * 8;
+        this.hp = 80 + wave * 20;
         this.maxHp = this.hp;
         this.bullets = [];
         this.sTmr   = 0;
@@ -757,6 +788,140 @@ class Boss {
     cx() { return this.x + this.w / 2; }
 }
 
+// ── LASER BULLET — thin fast beam ───────────────────────────────
+class LaserBullet {
+    constructor(x, y) { this.x = x - 1; this.y = y; this.w = 3; this.h = 28; this.vy = 9; }
+    tick() { this.y += this.vy; }
+    draw() {
+        ctx.fillStyle = BRIGHT;
+        ctx.fillRect(this.x, this.y, this.w, this.h);
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = '#d4f06b';
+        ctx.fillRect(this.x - 1, this.y, this.w + 2, 4);
+        ctx.globalAlpha = 1;
+    }
+    alive() { return this.y < H + 30; }
+}
+
+// ── FIRE BULLET — wide slow fire blob ────────────────────────────
+class FireBullet {
+    constructor(x, y) {
+        this.x = x - 8; this.y = y; this.w = 16; this.h = 16; this.vy = 2.5; this.t = 0;
+    }
+    tick() { this.y += this.vy; this.t++; }
+    draw() {
+        ctx.globalAlpha = 0.85 + Math.sin(this.t * 0.4) * 0.15;
+        ctx.fillStyle = '#cc5500';
+        ctx.fillRect(this.x + 3, this.y, this.w - 6, this.h);
+        ctx.fillRect(this.x, this.y + 4, this.w, this.h - 8);
+        ctx.fillStyle = BRIGHT;
+        ctx.fillRect(this.x + 5, this.y + 4, this.w - 10, this.h - 8);
+        ctx.globalAlpha = 1;
+    }
+    alive() { return this.y < H + 20; }
+}
+
+// ── LASER ENEMY — drops heart on kill ────────────────────────────
+class LaserEnemy {
+    constructor(wave) {
+        this.ps  = Math.max(2, Math.floor(Math.min(W, H) / 90));
+        this.pw  = EL_SPR[0].length;
+        this.ph  = EL_SPR.length;
+        this.w   = this.pw * this.ps;
+        this.h   = this.ph * this.ps;
+        this.x   = 10 + Math.random() * (W - this.w - 20);
+        this.y   = -this.h - 5;
+        this.vy  = 0.9 + Math.random() * 0.6 + wave * 0.08;
+        this.hp  = 2 + Math.floor(wave / 4);
+        this.maxHp = this.hp;
+        this.sTmr  = 50 + Math.random() * 80;
+        this.sRate = Math.max(70, 130 - wave * 3);
+        this.bullets = [];
+        this.flash = 0;
+    }
+    tick() {
+        this.y += this.vy;
+        this.sTmr++;
+        if (this.sTmr >= this.sRate) {
+            this.bullets.push(new LaserBullet(this.cx(), this.cy()));
+            this.sTmr = 0;
+        }
+        this.bullets = this.bullets.filter(b => { b.tick(); return b.alive(); });
+        if (this.flash > 0) this.flash--;
+    }
+    hit() { this.hp--; this.flash = 6; return this.hp <= 0; }
+    gone() { return this.y > H + 10; }
+    draw() {
+        if (this.flash > 0) {
+            ctx.globalAlpha = 0.55; ctx.fillStyle = BRIGHT;
+            ctx.fillRect(this.x, this.y, this.w, this.h); ctx.globalAlpha = 1;
+        }
+        spr(EL_SPR, EL_COLS, this.x, this.y, this.ps, true);
+        for (let i = 0; i < this.maxHp; i++) {
+            ctx.fillStyle = i < this.hp ? BRIGHT : DARK;
+            ctx.fillRect(this.x + i * 7, this.y - 7, 6, 3);
+        }
+        this.bullets.forEach(b => b.draw());
+    }
+    cx() { return this.x + this.w / 2; }
+    cy() { return this.y + this.h / 2; }
+}
+
+// ── FIRE ENEMY — drops ammo on kill ──────────────────────────────
+class FireEnemy {
+    constructor(wave) {
+        this.ps  = Math.max(2, Math.floor(Math.min(W, H) / 85));
+        this.pw  = EF_SPR[0].length;
+        this.ph  = EF_SPR.length;
+        this.w   = this.pw * this.ps;
+        this.h   = this.ph * this.ps;
+        this.x   = 10 + Math.random() * (W - this.w - 20);
+        this.y   = -this.h - 5;
+        this.vy  = 0.8 + Math.random() * 0.5 + wave * 0.06;
+        this.hp  = 3 + Math.floor(wave / 3);
+        this.maxHp = this.hp;
+        this.sTmr  = 40 + Math.random() * 70;
+        this.sRate = Math.max(80, 150 - wave * 4);
+        this.bullets = [];
+        this.flash = 0;
+        this.flameT = 0;
+    }
+    tick() {
+        this.y += this.vy; this.flameT++;
+        this.sTmr++;
+        if (this.sTmr >= this.sRate) {
+            this.bullets.push(new FireBullet(this.cx(), this.cy()));
+            this.sTmr = 0;
+        }
+        this.bullets = this.bullets.filter(b => { b.tick(); return b.alive(); });
+        if (this.flash > 0) this.flash--;
+    }
+    hit() { this.hp--; this.flash = 6; return this.hp <= 0; }
+    gone() { return this.y > H + 10; }
+    draw() {
+        if (this.flash > 0) {
+            ctx.globalAlpha = 0.55; ctx.fillStyle = BRIGHT;
+            ctx.fillRect(this.x, this.y, this.w, this.h); ctx.globalAlpha =1;
+        }
+        // flame flicker below ship
+        ctx.globalAlpha = 0.7 + Math.sin(this.flameT * 0.3) * 0.2;
+        ctx.fillStyle = '#cc5500';
+        const fw = this.w * 0.3, fx1 = this.x + this.w * 0.1, fx2 = this.x + this.w * 0.62;
+        const fh = (this.flameT % 6 < 3) ? this.ps * 3 : this.ps * 2;
+        ctx.fillRect(fx1, this.y + this.h, fw, fh);
+        ctx.fillRect(fx2, this.y + this.h, fw, fh);
+        ctx.globalAlpha = 1;
+        spr(EF_SPR, EF_COLS, this.x, this.y, this.ps, true);
+        for (let i = 0; i < this.maxHp; i++) {
+            ctx.fillStyle = i < this.hp ? BRIGHT : DARK;
+            ctx.fillRect(this.x + i * 7, this.y - 7, 6, 3);
+        }
+        this.bullets.forEach(b => b.draw());
+    }
+    cx() { return this.x + this.w / 2; }
+    cy() { return this.y + this.h / 2; }
+}
+
 // ── HUD ──────────────────────────────────────────────────────────
 const hScore   = document.getElementById('hScore');
 const hBest    = document.getElementById('hBest');
@@ -816,14 +981,14 @@ let bossMode  = false;
 let bossTimer = 0;
 const BOSS_INT = 1200;
 
-let player, enemies, minis, boss, powerups, spawnT, miniSpawnT;
+let player, enemies, lasers, fires, minis, boss, powerups, spawnT, lSpawnT, fSpawnT;
 
 function initGame() {
     player   = new Player();
-    enemies  = []; minis = []; boss = null; powerups = [];
+    enemies  = []; lasers = []; fires = []; minis = []; boss = null; powerups = [];
     parts.length = 0; floats.length = 0;
     score    = 0; wave = 1; kills = 0; time = 0;
-    bossMode = false; bossTimer = 0; spawnT = 0; miniSpawnT = 0;
+    bossMode = false; bossTimer = 0; spawnT = 0; lSpawnT = 0; fSpawnT = 0;
     running  = true;
     clouds.length = 0; initBG();
     SND.startMusic();
@@ -897,24 +1062,37 @@ function loop() {
 
     time++; score++;
 
-    // spawn regular enemies — enforce min horizontal gap between ships
+    // spawn enemies — enforce min 80px gap between ships
     if (!bossMode) {
+        // regular jet
         spawnT++;
-        const rate = Math.max(50, 90 - wave * 3); // slower spawn = more gaps
+        const rate = Math.max(50, 90 - wave * 3);
         if (spawnT >= rate) {
             const newE = new Enemy(wave);
-            // check min spacing of 80px from existing enemies
-            const tooClose = enemies.some(e => Math.abs(e.x - newE.x) < 80);
-            if (!tooClose) enemies.push(newE);
+            if (!enemies.some(e => Math.abs(e.x - newE.x) < 80)) enemies.push(newE);
             if (wave >= 3 && Math.random() < 0.25) {
                 const e2 = new Enemy(wave);
                 if (!enemies.some(e => Math.abs(e.x - e2.x) < 80)) enemies.push(e2);
             }
             spawnT = 0;
         }
+        // laser enemy — spawns from wave 2
+        if (wave >= 2) {
+            lSpawnT++;
+            if (lSpawnT >= Math.max(180, 320 - wave * 15)) {
+                lasers.push(new LaserEnemy(wave)); lSpawnT = 0;
+            }
+        }
+        // fire enemy — spawns from wave 3
+        if (wave >= 3) {
+            fSpawnT++;
+            if (fSpawnT >= Math.max(220, 380 - wave * 15)) {
+                fires.push(new FireEnemy(wave)); fSpawnT = 0;
+            }
+        }
         bossTimer++;
         if (bossTimer >= BOSS_INT) {
-            enemies = [];
+            enemies = []; lasers = []; fires = [];
             boss = new Boss(wave);
             bossMode = true; bossTimer = 0;
             bossWarn.style.display = 'block';
@@ -972,6 +1150,64 @@ function loop() {
         if (enemies[i] && enemies[i].gone()) enemies.splice(i, 1);
     }
 
+    // ── laser enemy logic ──
+    for (let i = lasers.length - 1; i >= 0; i--) {
+        const e = lasers[i];
+        e.tick();
+        for (let j = player.bullets.length - 1; j >= 0; j--) {
+            if (rects(player.bullets[j], e)) {
+                player.bullets.splice(j, 1);
+                if (e.hit()) {
+                    boom(e.cx(), e.cy(), false);
+                    powerups.push(new Powerup(e.cx() - 14, e.cy(), 'heart')); // guaranteed heart
+                    lasers.splice(i, 1); score += 200 * wave; kills++;
+                    if (kills % 8 === 0) { wave++; SND.waveDone(); }
+                }
+                break;
+            }
+        }
+        if (i >= lasers.length) continue;
+        const le = lasers[i]; if (!le) continue;
+        for (let j = le.bullets.length - 1; j >= 0; j--) {
+            if (rects(le.bullets[j], player)) {
+                le.bullets.splice(j, 1);
+                if (player.hit()) { gameOver(); return; }
+                break;
+            }
+        }
+        if (lasers[i] && rects(lasers[i], player)) { if (player.hit()) { gameOver(); return; } }
+        if (lasers[i] && lasers[i].gone()) lasers.splice(i, 1);
+    }
+
+    // ── fire enemy logic ──
+    for (let i = fires.length - 1; i >= 0; i--) {
+        const e = fires[i];
+        e.tick();
+        for (let j = player.bullets.length - 1; j >= 0; j--) {
+            if (rects(player.bullets[j], e)) {
+                player.bullets.splice(j, 1);
+                if (e.hit()) {
+                    boom(e.cx(), e.cy(), false);
+                    powerups.push(new Powerup(e.cx() - 14, e.cy(), 'bullet')); // guaranteed ammo
+                    fires.splice(i, 1); score += 200 * wave; kills++;
+                    if (kills % 8 === 0) { wave++; SND.waveDone(); }
+                }
+                break;
+            }
+        }
+        if (i >= fires.length) continue;
+        const fe = fires[i]; if (!fe) continue;
+        for (let j = fe.bullets.length - 1; j >= 0; j--) {
+            if (rects(fe.bullets[j], player)) {
+                fe.bullets.splice(j, 1);
+                if (player.hit()) { gameOver(); return; }
+                break;
+            }
+        }
+        if (fires[i] && rects(fires[i], player)) { if (player.hit()) { gameOver(); return; } }
+        if (fires[i] && fires[i].gone()) fires.splice(i, 1);
+    }
+
     // ── mini enemy logic (during boss) ──
     for (let i = minis.length - 1; i >= 0; i--) {
         const m = minis[i];
@@ -1016,6 +1252,7 @@ function loop() {
                     score += 1500 * wave; wave++;
                     SND.waveDone(); SND.startMusic();
                     bossMode = false; boss = null; minis = [];
+                    lasers = []; fires = [];
                     // drop a guaranteed heart on boss kill
                     powerups.push(new Powerup(W/2 - 14, 100, 'heart'));
                 }
@@ -1036,6 +1273,8 @@ function loop() {
     // ── draw ──
     powerups.forEach(p => p.draw());
     enemies.forEach(e => e.draw());
+    lasers.forEach(e => e.draw());
+    fires.forEach(e => e.draw());
     minis.forEach(m => m.draw());
     if (boss) boss.draw();
     tickParts();
