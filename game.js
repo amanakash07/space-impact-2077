@@ -1251,9 +1251,11 @@ function loop() {
             if (rects(player.bullets[j], m)) {
                 player.bullets.splice(j, 1);
                 boom(m.cx(), m.cy(), false);
-                // Always drop bullet pack during boss fight; every 3rd mini also drops a heart
-                powerups.push(new Powerup(m.cx() - 14, m.cy(), 'bullet'));
-                if (score % 3 === 0) powerups.push(new Powerup(m.cx() + 4, m.cy(), 'heart'));
+                // Boss fight drops: 30% shield, 20% heart, 20% ammo, 30% nothing
+                const dr = Math.random();
+                if      (dr < 0.30) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'shield'));
+                else if (dr < 0.50) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'heart'));
+                else if (dr < 0.70) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'bullet'));
                 minis.splice(i, 1);
                 score += 50 * wave;
                 break;
