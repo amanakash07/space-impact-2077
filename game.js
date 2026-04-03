@@ -949,47 +949,57 @@ function drawHUD(score, wave, player) {
     hWave.textContent  = 'WAVE: '  + wave;
     if (!player) return;
 
-    // ── All bars at the TOP, centered ──────────────────────────────
-    const bw = Math.min(220, W * 0.38), bh = 14, bx = W/2 - bw/2;
-    const gap = 26;
-    let barY = 36;
+    // ── Bars: HP left, AMMO right, SHIELD/POWER center ─────────────
+    const bh = 16, bw = Math.min(160, W * 0.28);
+    const pad = 10, barY = 34;
 
-    function drawBar(label, frac, col, warn) {
-        // label above bar
-        ctx.fillStyle = warn ? '#ff6622' : BRIGHT;
-        ctx.font = 'bold 11px Courier New';
-        ctx.textAlign = 'center';
-        ctx.fillText(label, W/2, barY - 2);
+    function drawSideBar(label, frac, col, warn, x) {
         // track
         ctx.fillStyle = '#0a1a05';
-        ctx.fillRect(bx, barY, bw, bh);
+        ctx.fillRect(x, barY, bw, bh);
         // fill
         ctx.fillStyle = warn ? '#cc3300' : col;
-        ctx.fillRect(bx, barY, Math.round(bw * Math.max(0, frac)), bh);
+        ctx.fillRect(x, barY, Math.round(bw * Math.max(0, frac)), bh);
         // border
-        ctx.strokeStyle = BRIGHT; ctx.lineWidth = 1;
-        ctx.strokeRect(bx, barY, bw, bh);
+        ctx.strokeStyle = warn ? '#ff6622' : DARK;
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, barY, bw, bh);
+        // label inside bar
+        ctx.fillStyle = DARK;
+        ctx.font = 'bold 10px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, x + bw / 2, barY + bh - 4);
         ctx.textAlign = 'left';
-        barY += gap;
     }
 
-    // HP bar — always shown
-    drawBar('HP', player.hp / player.maxHp, BRIGHT, player.hp <= 2);
+    function drawCenterBar(label, frac, col, offset) {
+        const cw = Math.min(120, W * 0.2), cx = W/2 - cw/2;
+        const cy = barY + offset * (bh + 4);
+        ctx.fillStyle = '#0a1a05';
+        ctx.fillRect(cx, cy, cw, bh);
+        ctx.fillStyle = col;
+        ctx.fillRect(cx, cy, Math.round(cw * Math.max(0, frac)), bh);
+        ctx.strokeStyle = DARK; ctx.lineWidth = 1;
+        ctx.strokeRect(cx, cy, cw, bh);
+        ctx.fillStyle = DARK;
+        ctx.font = 'bold 9px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText(label, W/2, cy + bh - 4);
+        ctx.textAlign = 'left';
+    }
 
-    // AMMO bar — always shown; flashes red when low
+    // HP — left side
+    drawSideBar('HP', player.hp / player.maxHp, BRIGHT, player.hp <= 2, pad);
+
+    // AMMO — right side
     const ammoFrac = player.bulletPower ? 1 : player.ammo / player.maxAmmo;
     const ammoLow  = !player.bulletPower && player.ammo <= 10;
-    drawBar(player.bulletPower ? 'ENDLESS' : 'AMMO', ammoFrac, player.bulletPower ? '#d4f06b' : BRIGHT, ammoLow);
+    drawSideBar(player.bulletPower ? 'ENDLESS' : 'AMMO', ammoFrac, player.bulletPower ? '#d4f06b' : BRIGHT, ammoLow, W - pad - bw);
 
-    // SHIELD timer bar — only when active
-    if (player.shield) {
-        drawBar('SHIELD', player.shieldTimer / 300, SHIELD_COL, false);
-    }
-
-    // POWER timer bar — only when active
-    if (player.bulletPower) {
-        drawBar('POWER', player.bulletTimer / 400, '#d4f06b', false);
-    }
+    // SHIELD + POWER — center, stacked
+    let cOffset = 0;
+    if (player.shield)      { drawCenterBar('SHIELD', player.shieldTimer / 300, SHIELD_COL, cOffset); cOffset++; }
+    if (player.bulletPower) { drawCenterBar('POWER',  player.bulletTimer  / 400, '#d4f06b',  cOffset); }
 }
 
 // ── GAME STATE ───────────────────────────────────────────────────
