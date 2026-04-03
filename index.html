@@ -52,71 +52,76 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 #startPanel {
     position:absolute; inset:0;
     background:
-        radial-gradient(ellipse at 50% 30%, rgba(173,255,47,0.08) 0%, transparent 65%),
+        radial-gradient(ellipse at 50% 25%, rgba(173,255,47,0.1) 0%, transparent 60%),
         linear-gradient(180deg, #020d01 0%, #041202 50%, #020d01 100%);
     display:flex;
     flex-direction:column;
     align-items:center;
     justify-content:space-between;
-    padding:clamp(30px,6vh,70px) clamp(20px,6vw,80px) clamp(20px,4vh,50px);
+    padding:clamp(28px,5vh,60px) clamp(20px,6vw,80px) clamp(18px,3.5vh,40px);
     text-align:center;
     overflow-y:auto;
 }
 
-/* title */
+/* TITLE */
 .lob-title {
-    font-size:clamp(36px,8vw,100px);
+    font-size:clamp(38px,9vw,110px);
     font-weight:bold;
-    letter-spacing:clamp(6px,2vw,18px);
+    letter-spacing:clamp(6px,2vw,20px);
     color:#adff2f;
     text-shadow:
         0 0 10px #adff2f,
-        0 0 30px rgba(173,255,47,0.6),
-        0 0 60px rgba(173,255,47,0.3);
+        0 0 30px rgba(173,255,47,0.7),
+        0 0 70px rgba(173,255,47,0.3);
     line-height:1;
 }
 .lob-sub {
-    margin-top:clamp(10px,2vh,22px);
-    font-size:clamp(14px,2.4vw,26px);
+    margin-top:clamp(10px,2vh,20px);
+    font-size:clamp(15px,2.6vw,28px);
+    font-weight:bold;
     color:#6ab04c;
-    letter-spacing:2px;
+    letter-spacing:1px;
 }
 
-/* middle section */
+/* MIDDLE */
 .lob-mid {
     display:flex;
     flex-direction:column;
     align-items:center;
-    gap:clamp(18px,3vh,36px);
+    gap:clamp(16px,2.8vh,32px);
     width:100%;
-    max-width:640px;
+    max-width:680px;
 }
 
-/* controls line */
+/* CONTROLS */
 .lob-ctrl {
     font-size:clamp(13px,2vw,20px);
+    font-weight:bold;
     color:#4d7c0f;
     letter-spacing:2px;
     border:1px solid #2d6a1e;
     padding:10px 28px;
+    width:100%;
 }
 
-/* x handle */
+/* X HANDLE */
 .lob-x-label {
-    font-size:clamp(12px,1.8vw,17px);
+    font-size:clamp(12px,1.8vw,18px);
+    font-weight:bold;
     color:#4d7c0f;
-    letter-spacing:3px;
+    letter-spacing:4px;
     margin-bottom:10px;
 }
 #xInput {
     width:100%;
-    max-width:420px;
+    max-width:440px;
     background:transparent;
     border:none;
     border-bottom:2px solid #2d6a1e;
     color:#adff2f;
     font-family:'Courier New',monospace;
-    font-size:clamp(18px,3vw,28px);
+    font-size:clamp(20px,3.2vw,32px);
+    font-weight:bold;
     padding:8px 4px;
     outline:none;
     letter-spacing:2px;
@@ -124,70 +129,72 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     transition:border-color 0.2s;
 }
 #xInput:focus { border-bottom-color:#adff2f; }
-#xInput::placeholder { color:#1a3d0a; }
+#xInput::placeholder { color:#1a3d0a; font-weight:normal; }
 
-/* start button */
+/* START BUTTON */
 #btnStart {
-    padding:clamp(12px,2.2vh,20px) clamp(50px,10vw,110px);
-    font-size:clamp(18px,3.2vw,30px);
+    padding:clamp(12px,2.2vh,20px) clamp(52px,10vw,120px);
+    font-size:clamp(20px,3.5vw,34px);
     font-family:'Courier New',monospace;
     font-weight:bold;
-    letter-spacing:5px;
+    letter-spacing:6px;
     background:transparent;
     color:#adff2f;
     border:2px solid #adff2f;
     cursor:pointer;
-    box-shadow:0 0 16px rgba(173,255,47,0.2), inset 0 0 16px rgba(173,255,47,0.04);
+    box-shadow:0 0 18px rgba(173,255,47,0.25), inset 0 0 18px rgba(173,255,47,0.05);
     transition:box-shadow 0.2s, background 0.2s;
 }
-#btnStart:hover  { background:rgba(173,255,47,0.08); box-shadow:0 0 28px rgba(173,255,47,0.45); }
+#btnStart:hover  { background:rgba(173,255,47,0.08); box-shadow:0 0 32px rgba(173,255,47,0.5); }
 #btnStart:active { background:rgba(173,255,47,0.15); }
 
-/* top 3 scores */
+/* TOP 3 SCORES */
 .lob-scores-title {
-    font-size:clamp(12px,1.8vw,18px);
-    color:#2d6a1e;
+    font-size:clamp(13px,1.9vw,20px);
+    font-weight:bold;
+    color:#4d7c0f;
     letter-spacing:4px;
     margin-bottom:10px;
 }
 #leaderList {
     list-style:none;
     width:100%;
-    max-width:500px;
+    max-width:520px;
 }
 #leaderList li {
     display:flex;
     justify-content:space-between;
     align-items:center;
-    padding:8px 0;
+    padding:9px 4px;
     border-bottom:1px solid #0d2208;
-    font-size:clamp(14px,2.2vw,22px);
+    font-size:clamp(15px,2.4vw,24px);
+    font-weight:bold;
     letter-spacing:1px;
 }
 #leaderList li:last-child { border:none; }
-.lrank  { color:#2d6a1e; min-width:40px; text-align:left; }
+.lrank  { color:#2d6a1e; min-width:44px; text-align:left; }
 .lhandle a { color:#adff2f; text-decoration:none; }
-.lhandle a:hover { text-shadow:0 0 6px #adff2f; }
+.lhandle a:hover { text-shadow:0 0 8px #adff2f; }
 .lhandle span { color:#2d6a1e; }
-.lscore { color:#6ab04c; font-weight:bold; }
+.lscore { color:#6ab04c; }
 #leaderList li.lb-you .lhandle a,
 #leaderList li.lb-you .lscore { color:#fff; }
 
-/* footer */
+/* FOOTER */
 .lob-footer {
-    font-size:clamp(16px,2.8vw,28px);
+    font-size:clamp(16px,2.8vw,30px);
+    font-weight:bold;
     color:#2d6a1e;
     letter-spacing:2px;
 }
 .lob-footer a {
     color:#4d7c0f;
     text-decoration:none;
-    font-weight:bold;
     transition:color 0.2s, text-shadow 0.2s;
 }
 .lob-footer a:hover {
     color:#adff2f;
-    text-shadow:0 0 8px rgba(173,255,47,0.6);
+    text-shadow:0 0 10px rgba(173,255,47,0.7);
 }
 
 /* ══════════════════════════════════════
@@ -202,13 +209,13 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     color:#adff2f;
     max-width:92vw;
 }
-#overPanel h1 { font-size:clamp(24px,5vw,44px); letter-spacing:4px; margin-bottom:14px; }
-#overPanel p  { font-size:clamp(12px,2.5vw,17px); color:#6ab04c; margin:6px 0; }
-#oGlobal { font-size:clamp(9px,1.6vw,12px) !important; color:#2d6a1e !important; margin-top:8px !important; }
+#overPanel h1 { font-size:clamp(26px,5vw,48px); letter-spacing:4px; margin-bottom:14px; font-weight:bold; }
+#overPanel p  { font-size:clamp(14px,2.8vw,22px); font-weight:bold; color:#6ab04c; margin:6px 0; }
+#oGlobal { font-size:clamp(11px,1.8vw,15px) !important; color:#2d6a1e !important; font-weight:normal !important; margin-top:8px !important; }
 #overPanel button {
     margin-top:22px;
-    padding:10px 44px;
-    font-size:clamp(14px,3vw,20px);
+    padding:12px 48px;
+    font-size:clamp(16px,3vw,24px);
     font-family:'Courier New',monospace;
     font-weight:bold;
     letter-spacing:3px;
@@ -219,7 +226,7 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 }
 #overPanel button:active { background:rgba(173,255,47,0.1); }
 
-/* ── IN-GAME PLAYER TAG ── */
+/* IN-GAME PLAYER TAG */
 #playerTag {
     position:fixed; bottom:6px; left:10px;
     font-family:'Courier New',monospace;
@@ -233,7 +240,7 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 }
 #playerTag:hover { color:#adff2f; }
 
-/* ── TOUCH CONTROLS ── */
+/* TOUCH CONTROLS */
 #touchLeft, #touchRight {
     position:fixed; bottom:50px;
     width:90px; height:90px;
@@ -264,7 +271,6 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
     #touchLeft, #touchRight, #touchFire { display:flex; }
 }
 
-/* ── BOSS WARN ── */
 #bossWarn {
     position:fixed; top:50%; left:50%;
     transform:translate(-50%,-50%);
@@ -293,18 +299,18 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 
 <div id="overlay">
 
-    <!-- ══ LOBBY ══ -->
+    <!-- LOBBY -->
     <div id="startPanel">
 
         <div>
             <div class="lob-title">SPACE IMPACT 2077</div>
-            <div class="lob-sub">Bad aliens are invading Earth &mdash; be the last line of defence</div>
+            <div class="lob-sub">Bad aliens are invading Earth. Be the last line of defence!</div>
         </div>
 
         <div class="lob-mid">
 
             <div class="lob-ctrl">
-                ARROW / A D &nbsp;&mdash;&nbsp; MOVE &nbsp;&nbsp;|&nbsp;&nbsp; SPACE &nbsp;&mdash;&nbsp; SHOOT
+                ARROW / A D  -  MOVE &nbsp;&nbsp;|&nbsp;&nbsp; SPACE  -  SHOOT
             </div>
 
             <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
@@ -314,25 +320,25 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
                        spellcheck="false" autocomplete="off">
             </div>
 
-            <button id="btnStart">&#9654;&nbsp; START</button>
+            <button id="btnStart">&#9654; START</button>
 
-            <div style="width:100%;text-align:center;">
-                <div class="lob-scores-title">&#9733; TOP SCORES &#9733;</div>
+            <div style="width:100%;display:flex;flex-direction:column;align-items:center;">
+                <div class="lob-scores-title">TOP SCORES</div>
                 <ul id="leaderList">
-                    <li><span class="lrank"></span><span class="lhandle"><span style="color:#1a3d0a">Loading...</span></span><span class="lscore"></span></li>
+                    <li><span class="lrank"></span><span class="lhandle"><span>Loading...</span></span><span class="lscore"></span></li>
                 </ul>
             </div>
 
         </div>
 
         <div class="lob-footer">
-            Made with &#9829; &nbsp;&mdash;&nbsp; Follow&nbsp;
+            Made with &#9829; &nbsp; Follow &nbsp;
             <a href="https://x.com/0xAkashDev" target="_blank" rel="noopener">@0xAkashDev</a>
         </div>
 
     </div>
 
-    <!-- ══ GAME OVER ══ -->
+    <!-- GAME OVER -->
     <div id="overPanel" style="display:none">
         <h1>GAME OVER</h1>
         <p id="oScore">SCORE: 0</p>
@@ -349,10 +355,12 @@ canvas { display:block; image-rendering:pixelated; image-rendering:crisp-edges; 
 <div id="bossWarn">&#9888; BOSS &#9888;</div>
 
 <script>
-const GIST_ID    = 'f53a8729a8ce3d92a75966adb5040dc8';
-const GIST_TOKEN = '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';
-const GIST_FILE  = 'scores.json';
-const MAX_SCORES = 10;
+// ================================================================
+//  GLOBAL LEADERBOARD - Firebase Realtime Database (REST, no SDK)
+//  Replace FIREBASE_URL with your database URL after setup
+// ================================================================
+const FIREBASE_URL = 'REPLACE_WITH_YOUR_FIREBASE_URL';
+const MAX_SCORES   = 10;
 
 function cleanHandle(v) {
     v = (v || '').trim();
@@ -360,47 +368,56 @@ function cleanHandle(v) {
     return v.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 30);
 }
 function xLink(h) {
-    if (!h) return '<span style="color:#2d6a1e">Anonymous</span>';
+    if (!h || h === 'Anonymous') return '<span style="color:#4d7c0f">Anonymous</span>';
     return `<a href="https://x.com/${h}" target="_blank" rel="noopener">@${h}</a>`;
 }
 
+const configured = () => FIREBASE_URL !== 'REPLACE_WITH_YOUR_FIREBASE_URL';
+
 async function fetchScores() {
+    if (!configured()) return [];
     try {
-        const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-            headers:{ 'Accept':'application/vnd.github+json' }
-        });
+        const res = await fetch(`${FIREBASE_URL}/scores.json`);
         if (!res.ok) return null;
         const data = await res.json();
-        const c = data.files[GIST_FILE]?.content;
-        return c ? JSON.parse(c).scores || [] : [];
+        if (!data) return [];
+        return Object.values(data);
     } catch(e) { return null; }
 }
 
-async function writeScores(scores) {
-    await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-        method:'PATCH',
-        headers:{
-            'Authorization':`token ${GIST_TOKEN}`,
-            'Accept':'application/vnd.github+json',
-            'Content-Type':'application/json'
-        },
-        body: JSON.stringify({ files:{ [GIST_FILE]:{ content: JSON.stringify({ scores }) } } })
+async function pushScore(entry) {
+    await fetch(`${FIREBASE_URL}/scores.json`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(entry)
     });
+}
+
+async function deleteKey(key) {
+    await fetch(`${FIREBASE_URL}/scores/${key}.json`, { method: 'DELETE' });
 }
 
 function renderLeaderboard(entries, myHandle) {
     const ul = document.getElementById('leaderList');
-    if (!entries || entries.length === 0) {
-        ul.innerHTML = '<li><span class="lrank"></span><span class="lhandle"><span style="color:#1a3d0a">'+(entries?'No scores yet — be first!':'Could not load')+'</span></span><span class="lscore"></span></li>';
+    if (!configured()) {
+        ul.innerHTML = '<li style="justify-content:center"><span style="color:#1a3d0a;font-size:14px">Leaderboard coming soon</span></li>';
         return;
     }
-    const top = [...entries].sort((a,b)=>b.score-a.score).slice(0,3);
-    const medals = ['#1','#2','#3'];
-    ul.innerHTML = top.map((e,i) => {
+    if (!entries) {
+        ul.innerHTML = '<li style="justify-content:center"><span style="color:#1a3d0a">Could not load</span></li>';
+        return;
+    }
+    if (entries.length === 0) {
+        ul.innerHTML = '<li style="justify-content:center"><span style="color:#2d6a1e">No scores yet. Be first!</span></li>';
+        return;
+    }
+    const top = [...entries].sort((a,b) => b.score - a.score).slice(0, 3);
+    const ranks = ['#1','#2','#3'];
+    ul.innerHTML = top.map((e, i) => {
         const mine = myHandle && cleanHandle(e.handle) === cleanHandle(myHandle);
-        return `<li${mine?' class="lb-you"':''}>
-            <span class="lrank">${medals[i]}</span>
-            <span class="lhandle">${xLink(cleanHandle(e.handle))}</span>
+        return `<li${mine ? ' class="lb-you"' : ''}>
+            <span class="lrank">${ranks[i]}</span>
+            <span class="lhandle">${xLink(e.handle)}</span>
             <span class="lscore">${String(e.score).padStart(6,'0')}</span>
         </li>`;
     }).join('');
@@ -412,24 +429,40 @@ async function loadAndRender() {
 }
 
 window.submitScore = async function(score, rawHandle) {
+    if (!configured()) return;
     const handle = cleanHandle(rawHandle) || 'Anonymous';
     const oGlobal = document.getElementById('oGlobal');
     try {
-        const scores = await fetchScores() || [];
-        const idx = scores.findIndex(e => cleanHandle(e.handle) === handle);
-        if (idx >= 0) {
-            if (scores[idx].score >= score) return;
-            scores[idx] = { score, handle, ts: Date.now() };
-        } else {
-            scores.push({ score, handle, ts: Date.now() });
+        // fetch all entries as object to get keys for deletion
+        const res = await fetch(`${FIREBASE_URL}/scores.json`);
+        const raw = res.ok ? await res.json() : null;
+        const existing = raw ? Object.entries(raw) : [];
+
+        // find if this handle already has a score
+        const prev = existing.find(([, v]) => cleanHandle(v.handle) === handle);
+        if (prev) {
+            if (prev[1].score >= score) return; // not an improvement
+            await deleteKey(prev[0]);            // remove old entry
         }
-        scores.sort((a,b)=>b.score-a.score);
-        scores.splice(MAX_SCORES);
-        await writeScores(scores);
+
+        await pushScore({ score, handle, ts: Date.now() });
+
+        // trim to top MAX_SCORES
+        const all = await fetch(`${FIREBASE_URL}/scores.json`).then(r => r.json());
+        if (all) {
+            const sorted = Object.entries(all).sort((a,b) => b[1].score - a[1].score);
+            for (let i = MAX_SCORES; i < sorted.length; i++) {
+                await deleteKey(sorted[i][0]);
+            }
+        }
+
         if (oGlobal) oGlobal.textContent = 'Score saved to leaderboard!';
-    } catch(e) { if (oGlobal) oGlobal.textContent = ''; }
+    } catch(e) {
+        if (oGlobal) oGlobal.textContent = '';
+    }
 };
 
+// username persistence + in-game tag
 (function() {
     const xInput    = document.getElementById('xInput');
     const playerTag = document.getElementById('playerTag');
@@ -453,7 +486,7 @@ window.submitScore = async function(score, rawHandle) {
     const observer = new MutationObserver(() => {
         if (!document.getElementById('overlay').classList.contains('hidden')) loadAndRender();
     });
-    observer.observe(document.getElementById('overlay'), { attributes:true });
+    observer.observe(document.getElementById('overlay'), { attributes: true });
 
     loadAndRender();
 })();
