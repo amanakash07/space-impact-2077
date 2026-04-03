@@ -1020,7 +1020,7 @@ window.addEventListener('keydown', e => {
     if (e.key === ' ' || e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
         inp.fire = true; e.preventDefault();
     }
-    if (!running) startGame();
+    if (!running && document.getElementById('overlay').classList.contains('hidden')) startGame();
 });
 window.addEventListener('keyup', e => {
     if (e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') inp.left  = false;
@@ -1031,11 +1031,11 @@ window.addEventListener('keyup', e => {
 const tL = document.getElementById('touchLeft');
 const tR = document.getElementById('touchRight');
 const tF = document.getElementById('touchFire');
-tL.addEventListener('touchstart', e => { e.preventDefault(); inp.left  = true;  if (!running) startGame(); }, {passive:false});
+tL.addEventListener('touchstart', e => { e.preventDefault(); inp.left  = true; }, {passive:false});
 tL.addEventListener('touchend',   e => { e.preventDefault(); inp.left  = false; }, {passive:false});
-tR.addEventListener('touchstart', e => { e.preventDefault(); inp.right = true;  if (!running) startGame(); }, {passive:false});
+tR.addEventListener('touchstart', e => { e.preventDefault(); inp.right = true; }, {passive:false});
 tR.addEventListener('touchend',   e => { e.preventDefault(); inp.right = false; }, {passive:false});
-tF.addEventListener('touchstart', e => { e.preventDefault(); inp.fire  = true;  if (!running) startGame(); }, {passive:false});
+tF.addEventListener('touchstart', e => { e.preventDefault(); inp.fire  = true; }, {passive:false});
 tF.addEventListener('touchend',   e => { e.preventDefault(); inp.fire  = false; }, {passive:false});
 tF.addEventListener('touchcancel',() => { inp.fire = false; });
 
