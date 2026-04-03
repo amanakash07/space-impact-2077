@@ -271,15 +271,23 @@ canvas {
 
 <script>
 // ================================================================
-//  GLOBAL LEADERBOARD  — Firebase Realtime Database (REST, no SDK)
-//  Setup: https://console.firebase.google.com
-//  1. Create project → Realtime Database → Start in TEST mode
-//  2. Copy your DB URL (e.g. https://YOUR-APP-default-rtdb.firebaseio.com)
-//  3. Replace FIREBASE_URL below
+//  GLOBAL LEADERBOARD — GitHub Gist (no Firebase, no backend)
+//
+//  One-time setup (2 min):
+//  1. Go to https://gist.github.com
+//     New gist → filename: scores.json → content: {"scores":[]}
+//     → Create PUBLIC gist
+//     → Copy the Gist ID from the URL (32-char hex string)
+//
+//  2. Go to https://github.com/settings/tokens
+//     Generate new token (classic) → check ONLY "gist" scope → copy it
+//
+//  3. Paste both below ↓
 // ================================================================
-const FIREBASE_URL = 'https://space-impact-2077-default-rtdb.firebaseio.com';
-const SCORES_PATH  = '/leaderboard';
-const MAX_ENTRIES  = 10;
+const GIST_ID    = 'YOUR_GIST_ID_HERE';        // ← replace
+const GIST_TOKEN = 'YOUR_GIST_TOKEN_HERE';     // ← replace (gist scope only)
+const GIST_FILE  = 'scores.json';
+const MAX_SCORES = 10;
 
 // ── helpers ──────────────────────────────────────────────────────
 function cleanHandle(v) {
@@ -287,24 +295,47 @@ function cleanHandle(v) {
     if (v.startsWith('@')) v = v.slice(1);
     return v.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 30);
 }
-
 function xLink(h) {
     if (!h) return '<span style="color:#4d7c0f">Anonymous</span>';
     return `<a href="https://x.com/${h}" target="_blank" rel="noopener">@${h}</a>`;
 }
 
-// ── leaderboard fetch / render ────────────────────────────────────
-async function fetchLeaderboard() {
+// ── fetch scores from gist ────────────────────────────────────────
+async function fetchScores() {
     try {
-        const res = await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`);
+        const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+            headers: { 'Accept': 'application/vnd.github+json' }
+        });
+        if (!res.ok) return null;
         const data = await res.json();
-        return data ? Object.values(data) : [];
+        const content = data.files[GIST_FILE]?.content;
+        return content ? JSON.parse(content).scores || [] : [];
     } catch(e) { return null; }
 }
 
+// ── write scores to gist ─────────────────────────────────────────
+async function writeScores(scores) {
+    await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+        method: 'PATCH',
+        headers: {
+            'Authorization': `token ${GIST_TOKEN}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            files: { [GIST_FILE]: { content: JSON.stringify({ scores }) } }
+        })
+    });
+}
+
+// ── render leaderboard ────────────────────────────────────────────
 function renderLeaderboard(entries, myHandle) {
     const ul = document.getElementById('leaderList');
-    const st = document.getElementById('lbStatus');
+    const configured = GIST_ID !== 'YOUR_GIST_ID_HERE';
+    if (!configured) {
+        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">Leaderboard not configured yet</li>';
+        return;
+    }
     if (!entries) {
         ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">Could not load scores</li>';
         return;
@@ -313,58 +344,42 @@ function renderLeaderboard(entries, myHandle) {
         ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">No scores yet — be first!</li>';
         return;
     }
-    const top = entries.sort((a,b) => b.score - a.score).slice(0, 5);
+    const medals = ['#1','#2','#3','#4','#5'];
+    const top = [...entries].sort((a,b) => b.score - a.score).slice(0, 5);
     ul.innerHTML = top.map((e, i) => {
         const mine = myHandle && cleanHandle(e.handle) === cleanHandle(myHandle);
-        const medal = ['&#9733;','&#9734;','&#9734;','&#9734;','&#9734;'][i];
         return `<li${mine?' class="lb-you"':''}>
-            <span class="lrank">${medal}</span>
-            <span class="lhandle">${xLink(cleanHandle(e.handle) || '')}</span>
+            <span class="lrank">${medals[i]}</span>
+            <span class="lhandle">${xLink(cleanHandle(e.handle))}</span>
             <span class="lscore">${String(e.score).padStart(6,'0')}</span>
         </li>`;
     }).join('');
-    st.textContent = '';
 }
 
 async function loadAndRender() {
     const handle = document.getElementById('xInput').value;
-    const entries = await fetchLeaderboard();
-    renderLeaderboard(entries, handle);
+    const scores = await fetchScores();
+    renderLeaderboard(scores, handle);
 }
 
 // ── submit score ──────────────────────────────────────────────────
 window.submitScore = async function(score, rawHandle) {
-    const handle = cleanHandle(rawHandle);
+    if (GIST_ID === 'YOUR_GIST_ID_HERE') return;   // not configured
+    const handle = cleanHandle(rawHandle) || 'Anonymous';
     const oGlobal = document.getElementById('oGlobal');
     try {
-        // fetch existing
-        const entries = await fetchLeaderboard() || [];
-        // check if this handle already has a higher score
-        const existing = entries.find(e => cleanHandle(e.handle) === handle);
-        if (existing && existing.score >= score) {
-            if (oGlobal) oGlobal.textContent = `Global best: ${String(existing.score).padStart(6,'0')} by @${handle}`;
-            return;
+        const scores = await fetchScores() || [];
+        const idx = scores.findIndex(e => cleanHandle(e.handle) === handle);
+        if (idx >= 0) {
+            if (scores[idx].score >= score) return;   // no improvement
+            scores[idx] = { score, handle, ts: Date.now() };
+        } else {
+            scores.push({ score, handle, ts: Date.now() });
         }
-
-        // push new entry
-        await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ score, handle: handle || 'Anonymous', ts: Date.now() })
-        });
-
-        // clean up old entries for same handle
-        const allRes = await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`);
-        const allData = await allRes.json();
-        if (allData) {
-            for (const [key, val] of Object.entries(allData)) {
-                if (cleanHandle(val.handle) === handle && val.score < score) {
-                    await fetch(`${FIREBASE_URL}${SCORES_PATH}/${key}.json`, { method: 'DELETE' });
-                }
-            }
-        }
-
-        if (oGlobal) oGlobal.textContent = `Score submitted to leaderboard!`;
+        scores.sort((a,b) => b.score - a.score);
+        scores.splice(MAX_SCORES);   // keep top 10
+        await writeScores(scores);
+        if (oGlobal) oGlobal.textContent = 'Score saved to leaderboard!';
     } catch(e) {
         if (oGlobal) oGlobal.textContent = '';
     }
