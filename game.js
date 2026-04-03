@@ -696,9 +696,9 @@ class Boss {
         this.miniSpawnT = 0;
         // burst-pause pattern
         this.burstCount = 0;
-        this.burstMax   = 4;     // 4 shots per burst
+        this.burstMax   = 3;     // 3 shots then pause
         this.pauseTimer = 0;
-        this.PAUSE_DUR  = 80;    // ~1.3 sec pause
+        this.PAUSE_DUR  = 120;   // ~2 sec full pause — clear dodge window
     }
     tick(px, py) {
         this.t++; if (this.flash > 0) this.flash--;
@@ -720,7 +720,7 @@ class Boss {
             this.pauseTimer--;
         } else {
             this.sTmr++;
-            const rate = this.phase === 2 ? 22 : 38;
+            const rate = this.phase === 2 ? 35 : 55; // slower fire rate inside burst
             if (this.sTmr >= rate) {
                 this.shoot(px, py); this.sTmr = 0; this.sPhase++;
                 this.burstCount++;
@@ -739,18 +739,17 @@ class Boss {
     }
     shoot(px, py) {
         const cx = this.cx(), cy = this.y + this.h;
-        const spd = 4.5;
+        const spd = 3.5; // slower = more time to dodge
         if (this.phase === 2) {
-            // enraged: 5-way fan, all pointing downward, spaced 0.22 rad
-            for (let i = 0; i < 5; i++) {
-                const a = (Math.PI / 2) + (i - 2) * 0.22;
+            // enraged: 3-way with BIG gaps (0.55 rad each side) — player fits between
+            for (let i = 0; i < 3; i++) {
+                const a = (Math.PI / 2) + (i - 1) * 0.55;
                 this.bullets.push(new EBullet(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd));
             }
         } else {
-            // normal: aimed double-shot (slight left/right offset)
+            // normal: single aimed shot — dodge left or right
             const [vx, vy] = aimed(cx, cy, px, py, spd);
-            this.bullets.push(new EBullet(cx - 6, cy, vx, vy));
-            this.bullets.push(new EBullet(cx + 6, cy, vx, vy));
+            this.bullets.push(new EBullet(cx, cy, vx, vy));
         }
         
     }
