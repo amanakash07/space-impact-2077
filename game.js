@@ -316,6 +316,7 @@ const SND = {
     shoot:      function() { playClone(this._shot); },
     eShoot:     function() { playClone(this._eshot); },
     hit:        function() { playClone(this._crash); },
+    playerHit:  function() { playClone(this._eshot); if (navigator.vibrate) navigator.vibrate(80); },
     explode:    function() { playClone(this._crash); },
     bossHit:    function() { playClone(this._crash); },
     bossShoot:  function() { playClone(this._shot); },
@@ -516,7 +517,8 @@ class Player {
         }
         this.hp--; this.inv = 55;
         boom(this.cx(), this.cy(), false);
-        if (this.hp <= 0) SND.hit();  // crash sound only on death
+        if (this.hp <= 0) SND.hit();  // big crash on death
+        else SND.playerHit();         // small thud + vibrate on hit
         return this.hp <= 0;
     }
     addHeart() {
