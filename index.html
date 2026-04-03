@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Space Impact 2077</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+    background:#000;
+    overflow:hidden;
+    width:100vw; height:100vh;
+    touch-action:none;
+    user-select:none;
+    -webkit-user-select:none;
+}
+canvas {
+    display:block;
+    image-rendering:pixelated;
+    image-rendering:crisp-edges;
+}
+
+/* ── HUD ── */
+#hud {
+    position:fixed; top:0; left:0; right:0;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:6px 14px;
+    font-family:'Courier New',monospace;
+    font-size:clamp(12px,3vw,20px);
+    font-weight:bold;
+    color:#1a3d0a;
+    letter-spacing:2px;
+    pointer-events:none;
+    z-index:10;
+}
+
+/* ── PANELS ── */
+#overlay {
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    z-index:20;
+    background:rgba(0,0,0,0.5);
+}
+#overlay.hidden { display:none; }
+
+.panel {
+    background:rgba(5,18,2,0.97);
+    border:4px solid #adff2f;
+    padding:clamp(18px,5vw,46px) clamp(22px,8vw,64px);
+    text-align:center;
+    font-family:'Courier New',monospace;
+    color:#adff2f;
+    max-width:92vw;
+}
+.panel h1 { font-size:clamp(20px,5vw,40px); letter-spacing:4px; margin-bottom:8px; }
+.panel p  { font-size:clamp(11px,2.5vw,16px); color:#6ab04c; margin:5px 0; }
+.panel small { font-size:clamp(9px,1.8vw,13px); color:#4d7c0f; display:block; margin-top:10px; }
+.panel button {
+    margin-top:20px;
+    padding:10px 38px;
+    font-size:clamp(14px,3vw,20px);
+    font-family:'Courier New',monospace;
+    font-weight:bold;
+    letter-spacing:3px;
+    background:#4d7c0f;
+    color:#adff2f;
+    border:2px solid #adff2f;
+    cursor:pointer;
+    display:block; margin-left:auto; margin-right:auto;
+}
+.panel button:active { background:#6ab04c; }
+
+/* ── TOUCH CONTROLS ── */
+#touchLeft, #touchRight {
+    position:fixed; bottom:50px;
+    width:90px; height:90px;
+    border-radius:50%;
+    background:rgba(26,61,10,0.4);
+    border:3px solid rgba(173,255,47,0.5);
+    color:#adff2f;
+    font-size:30px;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:30;
+    touch-action:none;
+}
+#touchLeft  { left:24px; }
+#touchRight { left:130px; }
+#touchFire {
+    position:fixed; bottom:55px; right:24px;
+    width:84px; height:84px;
+    border-radius:50%;
+    background:rgba(26,61,10,0.5);
+    border:3px solid rgba(173,255,47,0.7);
+    color:#adff2f;
+    font-family:'Courier New',monospace;
+    font-size:14px; font-weight:bold;
+    display:none;
+    align-items:center; justify-content:center;
+    z-index:30;
+    touch-action:none;
+}
+@media (pointer:coarse) {
+    #touchLeft, #touchRight, #touchFire { display:flex; }
+}
+
+#bossWarn {
+    position:fixed; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    font-family:'Courier New',monospace;
+    font-size:clamp(16px,4vw,28px);
+    font-weight:bold;
+    color:#1a3d0a;
+    text-align:center;
+    pointer-events:none;
+    z-index:15;
+    display:none;
+}
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div id="hud">
+    <span id="hScore">SCORE: 00000</span>
+    <span id="hBest">BEST: 00000</span>
+    <span id="hWave">WAVE: 1</span>
+</div>
+
+<div id="overlay">
+    <div class="panel" id="startPanel">
+        <h1>SPACE IMPACT 2077</h1>
+        <p>Shoot the jets — survive the boss!</p>
+        <p>Endless waves · Green skies · Pure pixel art</p>
+        <small>ARROW KEYS / A D — Move &nbsp;|&nbsp; SPACE — Shoot</small>
+        <small>Mobile: use the on-screen buttons</small>
+        <button id="btnStart">▶ START</button>
+    </div>
+    <div class="panel" id="overPanel" style="display:none">
+        <h1>GAME OVER</h1>
+        <p id="oScore">SCORE: 0</p>
+        <p id="oBest">BEST: 0</p>
+        <button id="btnRestart">▶ PLAY AGAIN</button>
+    </div>
+</div>
+
+<div id="touchLeft">◀</div>
+<div id="touchRight">▶</div>
+<div id="touchFire">FIRE</div>
+<div id="bossWarn">⚠ BOSS ⚠</div>
+
+<script src="game.js"></script>
+</body>
+</html>
