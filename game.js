@@ -1164,7 +1164,7 @@ function loop() {
                     boom(e.cx(), e.cy(), false);
                     tryDropPowerup(e.cx(), e.cy());
                     enemies.splice(i, 1);
-                    score += 100 * wave; kills++;
+                    score += 10; kills++;
                     if (kills % 8 === 0) { wave++; SND.waveDone(); }
                 }
                 break;
@@ -1195,7 +1195,7 @@ function loop() {
                 if (e.hit()) {
                     boom(e.cx(), e.cy(), false);
                     powerups.push(new Powerup(e.cx() - 14, e.cy(), 'heart')); // guaranteed heart
-                    lasers.splice(i, 1); score += 200 * wave; kills++;
+                    lasers.splice(i, 1); score += 15; kills++;
                     if (kills % 8 === 0) { wave++; SND.waveDone(); }
                 }
                 break;
@@ -1224,7 +1224,7 @@ function loop() {
                 if (e.hit()) {
                     boom(e.cx(), e.cy(), false);
                     powerups.push(new Powerup(e.cx() - 14, e.cy(), 'bullet')); // guaranteed ammo
-                    fires.splice(i, 1); score += 200 * wave; kills++;
+                    fires.splice(i, 1); score += 15; kills++;
                     if (kills % 8 === 0) { wave++; SND.waveDone(); }
                 }
                 break;
@@ -1257,7 +1257,7 @@ function loop() {
                 else if (dr < 0.50) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'heart'));
                 else if (dr < 0.70) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'bullet'));
                 minis.splice(i, 1);
-                score += 50 * wave;
+                score += 5;
                 break;
             }
         }
@@ -1288,7 +1288,7 @@ function loop() {
                     boom(boss.cx(), boss.y + boss.h/2, true);
                     boom(boss.cx() - 30, boss.y + boss.h*0.3, true);
                     boom(boss.cx() + 30, boss.y + boss.h*0.6, true);
-                    score += 1500 * wave; wave++;
+                    score += 100; wave++;
                     SND.waveDone(); SND.startMusic();
                     bossMode = false; boss = null; minis = [];
                     lasers = []; fires = [];
