@@ -1061,6 +1061,9 @@ function gameOver() {
     startPn.style.display = 'none';
     overPn.style.display  = 'block';
     overlay.classList.remove('hidden');
+    // Submit to global leaderboard
+    const handle = (document.getElementById('xInput') || {}).value || '';
+    if (typeof submitScore === 'function') submitScore(score, handle);
 }
 
 // ── POWERUP DROP ─────────────────────────────────────────────────

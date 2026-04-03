@@ -46,17 +46,17 @@ canvas {
 .panel {
     background:rgba(5,18,2,0.97);
     border:4px solid #adff2f;
-    padding:clamp(18px,5vw,46px) clamp(22px,8vw,64px);
+    padding:clamp(14px,4vw,38px) clamp(20px,7vw,58px);
     text-align:center;
     font-family:'Courier New',monospace;
     color:#adff2f;
     max-width:92vw;
 }
-.panel h1 { font-size:clamp(20px,5vw,40px); letter-spacing:4px; margin-bottom:8px; }
-.panel p  { font-size:clamp(11px,2.5vw,16px); color:#6ab04c; margin:5px 0; }
-.panel small { font-size:clamp(9px,1.8vw,13px); color:#4d7c0f; display:block; margin-top:10px; }
+.panel h1 { font-size:clamp(20px,5vw,40px); letter-spacing:4px; margin-bottom:6px; }
+.panel p  { font-size:clamp(11px,2.5vw,16px); color:#6ab04c; margin:4px 0; }
+.panel small { font-size:clamp(9px,1.8vw,13px); color:#4d7c0f; display:block; margin-top:8px; }
 .panel button {
-    margin-top:20px;
+    margin-top:16px;
     padding:10px 38px;
     font-size:clamp(14px,3vw,20px);
     font-family:'Courier New',monospace;
@@ -69,6 +69,81 @@ canvas {
     display:block; margin-left:auto; margin-right:auto;
 }
 .panel button:active { background:#6ab04c; }
+
+/* ── LEADERBOARD BLOCK ── */
+#leaderBlock {
+    margin: 12px 0 4px;
+    border-top: 1px solid #2d6a1e;
+    padding-top: 10px;
+}
+#leaderBlock .lb-title {
+    font-size:clamp(10px,2vw,13px);
+    color:#4d7c0f;
+    letter-spacing:3px;
+    margin-bottom:6px;
+}
+#leaderList {
+    list-style:none;
+    padding:0;
+    margin:0;
+}
+#leaderList li {
+    font-size:clamp(10px,2.2vw,14px);
+    color:#6ab04c;
+    letter-spacing:1px;
+    margin:3px 0;
+    display:flex;
+    justify-content:space-between;
+    gap:16px;
+}
+#leaderList li .lrank { color:#4d7c0f; min-width:22px; }
+#leaderList li .lhandle a { color:#adff2f; text-decoration:none; }
+#leaderList li .lhandle a:hover { text-decoration:underline; }
+#leaderList li .lscore { color:#adff2f; font-weight:bold; }
+#leaderList li.lb-you .lhandle a { color:#fff; }
+#leaderList li.lb-you .lscore { color:#fff; }
+#lbStatus { font-size:clamp(9px,1.6vw,11px); color:#2d6a1e; margin-top:4px; }
+
+/* ── USERNAME INPUT ── */
+.xrow {
+    margin-top:12px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+}
+.xrow label {
+    font-size:clamp(10px,2vw,13px);
+    color:#4d7c0f;
+    white-space:nowrap;
+}
+.xrow input {
+    background:#0a200a;
+    border:2px solid #4d7c0f;
+    color:#adff2f;
+    font-family:'Courier New',monospace;
+    font-size:clamp(11px,2.2vw,14px);
+    padding:5px 10px;
+    width:clamp(130px,32vw,210px);
+    outline:none;
+    letter-spacing:1px;
+}
+.xrow input:focus { border-color:#adff2f; }
+.xrow input::placeholder { color:#2d6a1e; }
+
+/* ── PLAYER TAG (in-game corner) ── */
+#playerTag {
+    position:fixed; bottom:6px; left:8px;
+    font-family:'Courier New',monospace;
+    font-size:clamp(9px,1.8vw,12px);
+    color:#2d6a1e;
+    letter-spacing:1px;
+    z-index:11;
+    pointer-events:auto;
+    text-decoration:none;
+    display:none;
+}
+#playerTag:hover { color:#adff2f; }
 
 /* ── TOUCH CONTROLS ── */
 #touchLeft, #touchRight {
@@ -104,6 +179,23 @@ canvas {
     #touchLeft, #touchRight, #touchFire { display:flex; }
 }
 
+/* ── MADE WITH LOVE ── */
+#madeWith {
+    position:fixed; bottom:8px; right:10px;
+    font-family:'Courier New',monospace;
+    font-size:clamp(8px,1.6vw,11px);
+    color:#1a3d0a;
+    letter-spacing:1px;
+    z-index:21;
+    pointer-events:auto;
+    white-space:nowrap;
+}
+#madeWith a {
+    color:#2d6a1e;
+    text-decoration:none;
+}
+#madeWith a:hover { color:#adff2f; }
+
 #bossWarn {
     position:fixed; top:50%; left:50%;
     transform:translate(-50%,-50%);
@@ -128,27 +220,190 @@ canvas {
     <span id="hWave">WAVE: 1</span>
 </div>
 
+<!-- In-game player tag (bottom-left) -->
+<a id="playerTag" href="#" target="_blank" rel="noopener"></a>
+
 <div id="overlay">
+    <!-- ── START PANEL ── -->
     <div class="panel" id="startPanel">
         <h1>SPACE IMPACT 2077</h1>
-        <p>Shoot the jets — survive the boss!</p>
-        <p>Endless waves · Green skies · Pure pixel art</p>
-        <small>ARROW KEYS / A D — Move &nbsp;|&nbsp; SPACE — Shoot</small>
+        <p>Bad aliens are invading Earth &mdash; be the last line of defence!</p>
+        <p>Survive the boss &middot; Collect power-ups &middot; Protect the planet</p>
+
+        <!-- Global leaderboard -->
+        <div id="leaderBlock">
+            <div class="lb-title">&#9733; LEADERBOARD &#9733;</div>
+            <ul id="leaderList"><li style="color:#2d6a1e;font-size:12px;justify-content:center">Loading...</li></ul>
+            <div id="lbStatus"></div>
+        </div>
+
+        <!-- X handle input -->
+        <div class="xrow">
+            <label>X handle:</label>
+            <input id="xInput" type="text" maxlength="30" placeholder="@yourusername (optional)" spellcheck="false" autocomplete="off">
+        </div>
+
+        <small>ARROW KEYS / A D &mdash; Move &nbsp;|&nbsp; SPACE &mdash; Shoot</small>
         <small>Mobile: use the on-screen buttons</small>
-        <button id="btnStart">▶ START</button>
+        <button id="btnStart">&#9654; START</button>
     </div>
+
+    <!-- ── GAME OVER PANEL ── -->
     <div class="panel" id="overPanel" style="display:none">
         <h1>GAME OVER</h1>
         <p id="oScore">SCORE: 0</p>
         <p id="oBest">BEST: 0</p>
-        <button id="btnRestart">▶ PLAY AGAIN</button>
+        <p id="oGlobal" style="font-size:clamp(10px,2vw,13px);color:#4d7c0f;margin-top:4px;"></p>
+        <button id="btnRestart">&#9654; PLAY AGAIN</button>
     </div>
 </div>
 
-<div id="touchLeft">◀</div>
-<div id="touchRight">▶</div>
+<!-- Made with love -->
+<div id="madeWith">
+    Made with &#9829; &nbsp;
+    <a href="https://x.com/0xAkashDev" target="_blank" rel="noopener">@0xAkashDev</a>
+</div>
+
+<div id="touchLeft">&#9664;</div>
+<div id="touchRight">&#9654;</div>
 <div id="touchFire">FIRE</div>
-<div id="bossWarn">⚠ BOSS ⚠</div>
+<div id="bossWarn">&#9888; BOSS &#9888;</div>
+
+<script>
+// ================================================================
+//  GLOBAL LEADERBOARD  — Firebase Realtime Database (REST, no SDK)
+//  Setup: https://console.firebase.google.com
+//  1. Create project → Realtime Database → Start in TEST mode
+//  2. Copy your DB URL (e.g. https://YOUR-APP-default-rtdb.firebaseio.com)
+//  3. Replace FIREBASE_URL below
+// ================================================================
+const FIREBASE_URL = 'https://space-impact-2077-default-rtdb.firebaseio.com';
+const SCORES_PATH  = '/leaderboard';
+const MAX_ENTRIES  = 10;
+
+// ── helpers ──────────────────────────────────────────────────────
+function cleanHandle(v) {
+    v = (v || '').trim();
+    if (v.startsWith('@')) v = v.slice(1);
+    return v.replace(/[^a-zA-Z0-9_]/g, '').slice(0, 30);
+}
+
+function xLink(h) {
+    if (!h) return '<span style="color:#4d7c0f">Anonymous</span>';
+    return `<a href="https://x.com/${h}" target="_blank" rel="noopener">@${h}</a>`;
+}
+
+// ── leaderboard fetch / render ────────────────────────────────────
+async function fetchLeaderboard() {
+    try {
+        const res = await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`);
+        const data = await res.json();
+        return data ? Object.values(data) : [];
+    } catch(e) { return null; }
+}
+
+function renderLeaderboard(entries, myHandle) {
+    const ul = document.getElementById('leaderList');
+    const st = document.getElementById('lbStatus');
+    if (!entries) {
+        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">Could not load scores</li>';
+        return;
+    }
+    if (entries.length === 0) {
+        ul.innerHTML = '<li style="color:#2d6a1e;font-size:11px;justify-content:center">No scores yet — be first!</li>';
+        return;
+    }
+    const top = entries.sort((a,b) => b.score - a.score).slice(0, 5);
+    ul.innerHTML = top.map((e, i) => {
+        const mine = myHandle && cleanHandle(e.handle) === cleanHandle(myHandle);
+        const medal = ['&#9733;','&#9734;','&#9734;','&#9734;','&#9734;'][i];
+        return `<li${mine?' class="lb-you"':''}>
+            <span class="lrank">${medal}</span>
+            <span class="lhandle">${xLink(cleanHandle(e.handle) || '')}</span>
+            <span class="lscore">${String(e.score).padStart(6,'0')}</span>
+        </li>`;
+    }).join('');
+    st.textContent = '';
+}
+
+async function loadAndRender() {
+    const handle = document.getElementById('xInput').value;
+    const entries = await fetchLeaderboard();
+    renderLeaderboard(entries, handle);
+}
+
+// ── submit score ──────────────────────────────────────────────────
+window.submitScore = async function(score, rawHandle) {
+    const handle = cleanHandle(rawHandle);
+    const oGlobal = document.getElementById('oGlobal');
+    try {
+        // fetch existing
+        const entries = await fetchLeaderboard() || [];
+        // check if this handle already has a higher score
+        const existing = entries.find(e => cleanHandle(e.handle) === handle);
+        if (existing && existing.score >= score) {
+            if (oGlobal) oGlobal.textContent = `Global best: ${String(existing.score).padStart(6,'0')} by @${handle}`;
+            return;
+        }
+
+        // push new entry
+        await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ score, handle: handle || 'Anonymous', ts: Date.now() })
+        });
+
+        // clean up old entries for same handle
+        const allRes = await fetch(`${FIREBASE_URL}${SCORES_PATH}.json`);
+        const allData = await allRes.json();
+        if (allData) {
+            for (const [key, val] of Object.entries(allData)) {
+                if (cleanHandle(val.handle) === handle && val.score < score) {
+                    await fetch(`${FIREBASE_URL}${SCORES_PATH}/${key}.json`, { method: 'DELETE' });
+                }
+            }
+        }
+
+        if (oGlobal) oGlobal.textContent = `Score submitted to leaderboard!`;
+    } catch(e) {
+        if (oGlobal) oGlobal.textContent = '';
+    }
+};
+
+// ── username persistence & player tag ────────────────────────────
+(function() {
+    const xInput    = document.getElementById('xInput');
+    const playerTag = document.getElementById('playerTag');
+
+    const saved = localStorage.getItem('xHandle') || '';
+    if (saved) xInput.value = saved;
+
+    function applyTag() {
+        const h = cleanHandle(xInput.value);
+        localStorage.setItem('xHandle', xInput.value.trim());
+        if (h) {
+            playerTag.textContent = '@' + h;
+            playerTag.href = 'https://x.com/' + h;
+            playerTag.style.display = 'block';
+        } else {
+            playerTag.style.display = 'none';
+        }
+    }
+    xInput.addEventListener('input', applyTag);
+    applyTag();
+
+    // Refresh leaderboard when overlay becomes visible
+    const observer = new MutationObserver(() => {
+        if (!document.getElementById('overlay').classList.contains('hidden')) {
+            loadAndRender();
+        }
+    });
+    observer.observe(document.getElementById('overlay'), { attributes: true });
+
+    // Initial load
+    loadAndRender();
+})();
+</script>
 
 <script src="game.js"></script>
 </body>
