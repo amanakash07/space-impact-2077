@@ -1075,13 +1075,10 @@ window.startGame = startGame;
 function gameOver() {
     running = false;
     SND.stopMusic();
-    if (score > hiScore) { 
-        hiScore = score; 
-        localStorage.setItem('psHi', String(hiScore));
-    }
+    if (score > hiScore) { hiScore = score; localStorage.setItem('psHi', hiScore); }
     hBest.textContent  = 'BEST: ' + String(hiScore).padStart(5, '0');
     oScore.textContent = 'SCORE: ' + score;
-    oBest.textContent  = 'BEST: '  + String(hiScore).padStart(5, '0');
+    oBest.textContent  = 'BEST: '  + hiScore;
     startPn.style.display = 'none';
     overPn.style.display  = 'block';
     overlay.classList.remove('hidden');
