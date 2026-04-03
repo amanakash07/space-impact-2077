@@ -23,7 +23,7 @@ const BRIGHT = '#adff2f';
 const GROUND = '#4a7a34';
 const GLINE  = '#3a6228';
 const SHIELD_COL = '#00e5ff';
-const HEART_COL  = '#ff4466';
+const HEART_COL  = BRIGHT;   // same green palette
 
 // ── SPRITE RENDERER ──────────────────────────────────────────────
 function spr(grid, cols, x, y, ps, flipY) {
@@ -111,59 +111,107 @@ const S_SPR = [
 ];
 const S_COLS = [DARK, SHIELD_COL];
 
-// Bullet powerup icon  7×7
+// Ammo powerup icon — bullet cartridge shape  5×9
 const BU_SPR = [
-    [0,0,1,1,1,0,0],
-    [0,1,2,2,2,1,0],
-    [1,2,2,3,2,2,1],
-    [1,2,3,3,3,2,1],
-    [1,2,2,3,2,2,1],
-    [0,1,2,2,2,1,0],
-    [0,0,1,1,1,0,0],
+    [0,1,1,1,0],
+    [1,2,3,2,1],
+    [1,2,3,2,1],
+    [1,1,1,1,1],
+    [1,2,2,2,1],
+    [1,2,2,2,1],
+    [1,2,2,2,1],
+    [1,2,2,2,1],
+    [0,1,1,1,0],
 ];
-const BU_COLS = [DARK, ACC, BRIGHT];
+const BU_COLS = [DARK, MID, BRIGHT];
 
-// ── SCROLLING BG ─────────────────────────────────────────────────
-const clouds = [];
+// ── SCROLLING SPACE BACKGROUND ───────────────────────────────────
+const bgObjs = [];   // stars + planets
 let bgOff = 0;
 
+// planet types: size, ring, colors
+const PLANET_TYPES = [
+    { r: 18, ring: false, col: MID,    shade: DARK  },  // small dark
+    { r: 28, ring: true,  col: ACC,    shade: MID   },  // medium with ring
+    { r: 14, ring: false, col: ACC,    shade: DARK  },  // tiny
+    { r: 40, ring: true,  col: MID,    shade: DARK  },  // big with ring
+    { r: 22, ring: false, col: GROUND, shade: DARK  },  // medium plain
+];
+
 function initBG() {
-    clouds.length = 0;
-    for (let i = 0; i < 18; i++) clouds.push(mkCloud(Math.random() * H));
+    bgObjs.length = 0;
+    // stars
+    for (let i = 0; i < 60; i++) {
+        bgObjs.push({ type:'star', x: Math.random()*W, y: Math.random()*H,
+            sz: Math.random() < 0.7 ? 2 : 3, spd: 0.4 + Math.random()*0.3 });
+    }
+    // planets spread across screen
+    for (let i = 0; i < 6; i++) {
+        bgObjs.push(mkPlanet(Math.random() * H));
+    }
 }
-function mkCloud(y) {
-    const big = Math.random() > 0.5;
-    return {
-        x: Math.random() * W, y,
-        w: (big ? 40 : 16) + Math.random() * 30,
-        h: (big ? 14 : 6)  + Math.random() * 10,
-        spd: 0.3 + Math.random() * 0.5,
-        type: big ? 'cloud' : 'dot',
-    };
+
+function mkPlanet(y) {
+    const t = PLANET_TYPES[Math.floor(Math.random() * PLANET_TYPES.length)];
+    return { type:'planet', x: Math.random() * W, y,
+        r: t.r, ring: t.ring, col: t.col, shade: t.shade,
+        spd: 0.15 + Math.random() * 0.2 };
 }
-function drawBG() {
-    ctx.fillStyle = BG;
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = BG2;
-    ctx.globalAlpha = 0.18;
-    ctx.fillRect(0, H * 0.6, W, H * 0.4);
-    ctx.globalAlpha = 1;
-    clouds.forEach(cl => {
-        cl.y += cl.spd;
-        if (cl.y > H + cl.h) Object.assign(cl, mkCloud(-cl.h - 5));
-        if (cl.type === 'cloud') {
-            ctx.fillStyle = ACC; ctx.globalAlpha = 0.28;
-            ctx.fillRect(cl.x, cl.y, cl.w, cl.h);
-            ctx.fillRect(cl.x + cl.w * 0.15, cl.y - cl.h * 0.45, cl.w * 0.55, cl.h * 0.55);
-        } else {
-            ctx.fillStyle = DARK; ctx.globalAlpha = 0.18;
-            ctx.fillRect(cl.x, cl.y, cl.w * 0.35, cl.h * 0.35);
+
+function drawPixelCircle(cx, cy, r, col, shadeCol) {
+    // pixel-art circle: draw filled squares in a circle pattern
+    for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+            if (dx*dx + dy*dy <= r*r) {
+                // shade the top-left quadrant slightly darker
+                ctx.fillStyle = (dx < 0 && dy < 0) ? shadeCol : col;
+                ctx.fillRect(Math.round(cx + dx), Math.round(cy + dy), 1, 1);
+            }
         }
-        ctx.globalAlpha = 1;
+    }
+}
+
+function drawBG() {
+    // deep space background — dark greenish-black
+    ctx.fillStyle = '#0a1a05';
+    ctx.fillRect(0, 0, W, H);
+
+    bgObjs.forEach(o => {
+        o.y += o.spd;
+        if (o.y > H + (o.r || 5) * 2) {
+            if (o.type === 'star')   Object.assign(o, { x: Math.random()*W, y: -4 });
+            else                     Object.assign(o, mkPlanet(-80));
+        }
+
+        if (o.type === 'star') {
+            ctx.globalAlpha = 0.55 + Math.random() * 0.15; // twinkle
+            ctx.fillStyle = BRIGHT;
+            ctx.fillRect(o.x, o.y, o.sz, o.sz);
+            ctx.globalAlpha = 1;
+        } else {
+            // planet body
+            ctx.globalAlpha = 0.55;
+            drawPixelCircle(o.x, o.y, o.r, o.col, o.shade);
+            // ring if applicable
+            if (o.ring) {
+                ctx.fillStyle = o.shade;
+                ctx.globalAlpha = 0.4;
+                const rw = Math.round(o.r * 2.2), rh = Math.round(o.r * 0.4);
+                ctx.fillRect(Math.round(o.x - rw/2), Math.round(o.y - rh/2), rw, rh);
+                // cut out planet center from ring
+                ctx.fillStyle = o.col;
+                ctx.globalAlpha = 0.55;
+                drawPixelCircle(o.x, o.y, o.r, o.col, o.shade);
+            }
+            ctx.globalAlpha = 1;
+        }
     });
-    bgOff = (bgOff + 1.2) % 80;
-    ctx.fillStyle = GROUND; ctx.fillRect(0, H - 12, W, 12);
-    ctx.fillStyle = GLINE;
+
+    // scrolling ground stripe (subtle)
+    bgOff = (bgOff + 0.8) % 80;
+    ctx.fillStyle = '#0f2208';
+    ctx.fillRect(0, H - 12, W, 12);
+    ctx.fillStyle = '#1a3d0a';
     for (let x = -bgOff; x < W; x += 80) {
         ctx.fillRect(x, H - 9, 28, 3);
         ctx.fillRect(x + 44, H - 5, 14, 2);
@@ -584,6 +632,11 @@ class Boss {
         this.flash  = 0;
         this.t      = 0;
         this.miniSpawnT = 0;
+        // burst-pause pattern
+        this.burstCount = 0;     // shots fired in current burst
+        this.burstMax   = 3;     // fire N shots then pause
+        this.pauseTimer = 0;     // countdown pause between bursts
+        this.PAUSE_DUR  = 90;    // ~1.5 sec pause
     }
     tick(px, py) {
         this.t++; if (this.flash > 0) this.flash--;
@@ -600,10 +653,20 @@ class Boss {
         this.x += this.mDir * 1.5;
         this.x = Math.max(0, Math.min(W - this.w, this.x));
 
-        this.sTmr++;
-        const rate = this.phase === 2 ? 25 : 45;
-        if (this.sTmr >= rate) {
-            this.shoot(px, py); this.sTmr = 0; this.sPhase++;
+        // burst-pause shoot logic
+        if (this.pauseTimer > 0) {
+            this.pauseTimer--;
+        } else {
+            this.sTmr++;
+            const rate = this.phase === 2 ? 30 : 50;
+            if (this.sTmr >= rate) {
+                this.shoot(px, py); this.sTmr = 0; this.sPhase++;
+                this.burstCount++;
+                if (this.burstCount >= this.burstMax) {
+                    this.burstCount = 0;
+                    this.pauseTimer = this.PAUSE_DUR; // pause after burst
+                }
+            }
         }
         this.bullets = this.bullets.filter(b => { b.tick(); return b.alive(); });
 
@@ -614,19 +677,17 @@ class Boss {
     }
     shoot(px, py) {
         const cx = this.cx(), cy = this.y + this.h;
-        const spd = 4.5;
+        const spd = 4.0;
         if (this.phase === 2) {
-            // enraged: 5-way narrow downward fan, all going downward
-            for (let i = 0; i < 5; i++) {
-                const a = (Math.PI / 2) + (i - 2) * 0.18; // tight 0.18 rad spacing
+            // enraged: 3-way narrow fan downward only
+            for (let i = 0; i < 3; i++) {
+                const a = (Math.PI / 2) + (i - 1) * 0.2;
                 this.bullets.push(new EBullet(cx, cy, Math.cos(a) * spd, Math.sin(a) * spd));
             }
         } else {
-            // normal: 3-way tight aimed burst
+            // normal: single aimed shot straight at player
             const [vx, vy] = aimed(cx, cy, px, py, spd);
-            this.bullets.push(new EBullet(cx, cy, vx,        vy));
-            this.bullets.push(new EBullet(cx, cy, vx - 0.8,  vy + 0.4));
-            this.bullets.push(new EBullet(cx, cy, vx + 0.8,  vy + 0.4));
+            this.bullets.push(new EBullet(cx, cy, vx, vy));
         }
         SND.bossShoot();
     }
@@ -791,9 +852,9 @@ function gameOver() {
 // ── POWERUP DROP ─────────────────────────────────────────────────
 function tryDropPowerup(x, y) {
     const r = Math.random();
-    if (r < 0.04)       powerups.push(new Powerup(x - 14, y, 'heart'));
-    else if (r < 0.07)  powerups.push(new Powerup(x - 14, y, 'shield'));
-    else if (r < 0.11)  powerups.push(new Powerup(x - 14, y, 'bullet'));
+    if (r < 0.12)       powerups.push(new Powerup(x - 14, y, 'heart'));
+    else if (r < 0.20)  powerups.push(new Powerup(x - 14, y, 'shield'));
+    else if (r < 0.30)  powerups.push(new Powerup(x - 14, y, 'bullet'));
 }
 
 // ── MAIN LOOP ────────────────────────────────────────────────────
