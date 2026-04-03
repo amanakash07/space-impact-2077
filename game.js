@@ -1258,11 +1258,11 @@ function loop() {
             if (rects(player.bullets[j], m)) {
                 player.bullets.splice(j, 1);
                 boom(m.cx(), m.cy(), false);
-                // Boss fight drops: 30% shield, 20% heart, 20% ammo, 30% nothing
+                // Boss fight drops: 30% shield, 20% heart, 40% ammo, 10% nothing
                 const dr = Math.random();
                 if      (dr < 0.30) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'shield'));
                 else if (dr < 0.50) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'heart'));
-                else if (dr < 0.70) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'bullet'));
+                else if (dr < 0.90) powerups.push(new Powerup(m.cx() - 14, m.cy(), 'bullet'));
                 minis.splice(i, 1);
                 score += 5;
                 break;
